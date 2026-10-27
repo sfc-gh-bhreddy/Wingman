@@ -112,6 +112,14 @@ const NO_SEM = "(No SE manager)";
 const NO_SE = "(No SE)";
 const NO_OWNER = "(No owner)";
 
+/** Keep SEM drill-downs inside the selected district, including missing assignments. */
+export function districtScope(deals: Deal[], district: string | null, sem: string | null = null): Deal[] {
+  return deals.filter((deal) =>
+    (district === null || (deal.district ?? NO_DISTRICT) === district) &&
+    (district === null || sem === null || (deal.seManager ?? NO_SEM) === sem),
+  );
+}
+
 export function byDistrict(deals: Deal[]): RollupRow[] {
   return rankByCoverage(
     tally(

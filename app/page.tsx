@@ -2,24 +2,25 @@
 
 import { PageShell } from "@/components/page-shell";
 import { KpiCard } from "@/components/kpi-card";
+import { DistrictTmrLeaderboard } from "@/components/district-tmr-leaderboard";
 import { CoverageCard } from "@/components/coverage-card";
-import { TrendMatrix } from "@/components/trend-matrix";
-import { MethodologyNote, Callout } from "@/components/methodology-note";
+import { Callout } from "@/components/methodology-note";
 import { useCoverage } from "@/components/coverage-provider";
 import { summarize, byRegion } from "@/lib/aggregate";
 import { formatUsd, pct1 } from "@/lib/format";
 import { regionLabel, APP_DESCRIPTION } from "@/lib/constants";
 
 export default function OverviewPage() {
-  const { visibleDeals } = useCoverage();
-  const s = summarize(visibleDeals);
-  const eligibleDeals = visibleDeals.filter((deal) => !deal.isSiInvolved && !deal.isOdFlip);
+  const { quarterDeals, quarter } = useCoverage();
+  const scopeLabel = quarter === "ALL" ? "FY27" : `FY27 Q${quarter}`;
+  const s = summarize(quarterDeals);
+  const eligibleDeals = quarterDeals.filter((deal) => !deal.isSiInvolved && !deal.isOdFlip);
   const eligible = summarize(eligibleDeals);
   const excluded = s.deals - eligible.deals;
-  const regions = byRegion(visibleDeals, regionLabel);
+  const regions = byRegion(quarterDeals, regionLabel);
 
   // Whale concentration: is a single gap deal most of the gap ACV?
-  const gapDeals = visibleDeals
+  const gapDeals = quarterDeals
     .filter((d) => !d.hasAnyAse)
     .sort((a, b) => b.cap1Acv - a.cap1Acv);
   const topGap = gapDeals[0];
@@ -34,18 +35,12 @@ export default function OverviewPage() {
       description={APP_DESCRIPTION}
       showQuarterFilter
     >
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <KpiCard label="Cap1 deals (FY27)" value={s.deals} sub="closed-won Cap1s in scope" />
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <KpiCard label={`Cap1 deals (${scopeLabel})`} value={s.deals} sub="closed-won Cap1s in scope" />
         <KpiCard
           label="Cap1 ACV"
           value={formatUsd(s.acv)}
           sub={`${formatUsd(s.gapAcv)} sits in uncovered deals`}
-        />
-        <KpiCard
-          label="ASE coverage (all)"
-          value={pct1(s.pctAnyAse)}
-          sub={`${s.covered} of ${s.deals} deals with an ASE attached`}
-          accent
         />
         <KpiCard
           label="ASE coverage (excluding SI / OD)"
@@ -54,8 +49,10 @@ export default function OverviewPage() {
         />
       </div>
       <p className="mt-2 text-xs text-muted-foreground">
-        Both coverage percentages use distinct Cap1 deals and the current region scope. The adjusted percentage excludes deals flagged SI involved or OD flip from both the covered count and the total; flags can overlap. These signals are review cues, not proof an ASE is unnecessary.
+        ASE coverage (excluding SI / OD) uses distinct Cap1 deals and the selected region and quarter. It excludes deals flagged SI involved or OD flip from both the covered count and the total; flags can overlap. These signals are review cues, not proof an ASE is unnecessary.
       </p>
+
+      <DistrictTmrLeaderboard />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
         {regions.map((r) => (
@@ -73,13 +70,6 @@ export default function OverviewPage() {
         ))}
       </div>
 
-      <div className="mt-8">
-        <h2 className="text-sm font-semibold text-muted-foreground mb-3">
-          Coverage by fiscal quarter (FY27)
-        </h2>
-        <TrendMatrix deals={visibleDeals} />
-      </div>
-
       <div className="mt-4 flex flex-col gap-4">
         {topGapShare >= 50 ? (
           <Callout title="Gap ACV is whale-skewed">
@@ -90,7 +80,6 @@ export default function OverviewPage() {
             list, not just by total ACV.
           </Callout>
         ) : null}
-        <MethodologyNote />
       </div>
     </PageShell>
   );

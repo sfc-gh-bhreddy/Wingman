@@ -24,7 +24,7 @@ function gzipFor(rows: Deal[]): Buffer {
 export async function GET(req: Request) {
   try {
     const rows = await getCached({
-      name: "coverage",
+      name: "coverage-agg-v9-upstream-activation",
       ttlMs: COVERAGE_TTL_MS,
       loader: getDeals,
     });
@@ -33,7 +33,7 @@ export async function GET(req: Request) {
       "Content-Type": "application/json; charset=utf-8",
       // Let the browser reuse the response briefly and serve stale while it
       // revalidates, so reloads/back-forward are instant.
-      "Cache-Control": "private, max-age=600, stale-while-revalidate=0",
+      "Cache-Control": "private, no-store",
       Vary: "Accept-Encoding",
     };
 

@@ -1,5 +1,5 @@
 -- =============================================================================
--- Wingmate — SPCS Deployment
+-- Wingman — SPCS Deployment
 -- =============================================================================
 -- Run these statements in order. Adjust DB/SCHEMA/POOL names to match your env.
 -- Prerequisites: a role with CREATE IMAGE REPOSITORY, CREATE SERVICE, and
@@ -30,7 +30,7 @@ SHOW COMPUTE POOLS;
 -- snow spcs image-registry login --connection "sfcogsops-snowhouse_aws_us_west_2"
 --
 -- # Build the image
--- cd ~/Desktop/Wingmate
+-- cd ~/Desktop/Wingman
 -- docker build --platform linux/amd64 -t wingmate:latest .
 --
 -- # Tag for Snowflake registry

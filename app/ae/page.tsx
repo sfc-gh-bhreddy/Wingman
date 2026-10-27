@@ -18,6 +18,7 @@ export default function AeRollupPage() {
     >
       <div className="flex flex-col gap-4">
         <RollupTable
+          warningTone="red"
           dimensionLabel="AE"
           rows={rows}
           hrefFor={(r) => `/uncovered?owner=${encodeURIComponent(r.key)}`}

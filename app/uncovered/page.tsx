@@ -74,7 +74,7 @@ function UncoveredInner() {
   // AE/SE drill-downs keep the existing deal scope, but separate accounts
   // with potential external involvement so they can still be reviewed.
   const isPersonDrill = Boolean(drillSe || drillOwner);
-  const filtered = drillLabel ? sorted : sorted.filter((deal) => !deal.hasAnyAse);
+  const filtered = sorted;
   // Partition by account: an opportunity-level registration can flag only one
   // of several deals, but the account should appear in just one section.
   const reviewAccountIds = new Set(
@@ -127,7 +127,7 @@ function UncoveredInner() {
           </div>
           <button
             type="button"
-            onClick={() => exportCsv(filtered, "uncovered-cap1s.csv")}
+            onClick={() => exportCsv(filtered, "ase-coverage-cap1s.csv")}
             className="inline-flex items-center gap-1.5 rounded-md border border-border px-3 py-1.5 text-xs font-medium hover:bg-muted transition-colors"
           >
             <Download className="size-3.5" />
@@ -142,7 +142,7 @@ function UncoveredInner() {
           <span>
             <strong className="text-foreground">{formatUsd(s.acv)}</strong> Cap1 ACV
           </span>
-          <span>median deal {formatUsd(s.gapAcvMedian || medianAcv(sorted))}</span>
+          <span>median deal {formatUsd(medianAcv(filtered))}</span>
         </div>
 
         {isPersonDrill ? <h2 className="text-sm font-semibold">Accounts without review signals ({new Set(regularDeals.map((deal) => deal.accountId)).size})</h2> : null}
@@ -190,7 +190,7 @@ export default function UncoveredPage() {
   return (
     <PageShell
       title="ASE Coverage"
-      description="Cap1 deals sorted by coverage status and close date. Use column filters to drill down."
+      description="All Cap1 deals in the selected region and quarter, including ASE assigned and No ASE. Use column filters to drill down."
       showQuarterFilter
     >
       <Suspense

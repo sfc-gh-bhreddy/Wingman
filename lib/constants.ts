@@ -5,9 +5,9 @@
 // business logic, this file and lib/recommend.ts are the only two places to look.
 // ============================================================================
 
-export const APP_TITLE = "Wingmate";
+export const APP_TITLE = "Wingman";
 export const APP_DESCRIPTION =
-  "ASC Engineer coverage on Cap1 deals across the Commercial org (FY27) \u2014 where you're covered, where the gaps are, and which Cap1s to attach an ASE to next.";
+  "ASC Engineer coverage on Cap1 deals across the Commercial org (FY27).";
 export const LOGO_PATH = "/icon.svg";
 
 // ----------------------------------------------------------------------------
@@ -45,11 +45,11 @@ export function regionLabel(region: string | null): string {
 /**
  * Two ACV thresholds split the book into three tiers:
  *   Above $65K               -> primarily 1:1 ASE
- *   Above $25K through $65K  -> consider hybrid: Bluebird + 1:1 ASE + Webinar
- *   Up to $25K               -> primarily Bluebird + Webinar
+ *   Above $10K through $65K  -> consider hybrid: Bluebird + 1:1 ASE + Webinar
+ *   Up to $10K               -> primarily Bluebird + Webinar
  */
 export const BLUEBIRD_MAX_ACV = 65_000;
-export const HYBRID_MIN_ACV = 25_000;
+export const HYBRID_MIN_ACV = 10_000;
 
 /** Bluebird private listing. Closed pilot behind a manual quality gate. */
 export const BLUEBIRD_LISTING_URL =
@@ -92,8 +92,8 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview" },
   { href: "/uncovered", label: "ASE Coverage" },
-  { href: "/dm", label: "DM Rollup" },
-  { href: "/sem", label: "SEM Rollup" },
+  { href: "/attachment-goals", label: "Attachment Goals" },
+  { href: "/district", label: "District Rollup" },
   { href: "/ae", label: "AE Rollup" },
   { href: "/se", label: "SE Rollup" },
 ];

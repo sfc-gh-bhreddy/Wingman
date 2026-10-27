@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListTodo, Building2, UserCog, Briefcase, BarChart3, Info, Sparkles } from "lucide-react";
+import { LayoutDashboard, ListTodo, Building2, Briefcase, BarChart3, BookOpen, Compass } from "lucide-react";
 import { APP_TITLE } from "@/lib/constants";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -12,18 +12,23 @@ const NAV_SECTIONS = [
     items: [
       { href: "/", label: "Overview", icon: LayoutDashboard },
       { href: "/uncovered", label: "ASE Coverage", icon: ListTodo },
-      { href: "/plays", label: "Suggested Plays", icon: Sparkles },
+      { href: "/attachment-goals", label: "Attachment Goals", icon: BarChart3 },
     ],
   },
   {
     label: "Rollups",
     items: [
-      { href: "/dm", label: "DM Rollup", icon: Building2 },
-      { href: "/sem", label: "SEM Rollup", icon: UserCog },
+      { href: "/district", label: "District Rollup", icon: Building2 },
       { href: "/ae", label: "AE Rollup", icon: Briefcase },
       { href: "/se", label: "SE Rollup", icon: BarChart3 },
     ],
   },
+];
+
+// Reference pages — shown below the main nav with extra space.
+const HELP_ITEMS = [
+  { href: "/dictionary", label: "Dictionary", icon: BookOpen },
+  { href: "/how-to", label: "How to navigate", icon: Compass },
 ];
 
 export function Sidebar() {
@@ -79,26 +84,33 @@ export function Sidebar() {
           </div>
         ))}
 
-        {/* Guide link — below nav with space */}
-        <div className="mt-4">
-          <Link
-            href="/guide"
-            className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] transition-colors"
-            style={
-              pathname === "/guide"
-                ? { background: "var(--sidebar-active)", color: "var(--foreground)" }
-                : { color: "var(--muted-foreground)" }
-            }
-            onMouseEnter={(e) => {
-              if (pathname !== "/guide") e.currentTarget.style.background = "var(--sidebar-hover)";
-            }}
-            onMouseLeave={(e) => {
-              if (pathname !== "/guide") e.currentTarget.style.background = "transparent";
-            }}
-          >
-            <Info className="size-4 shrink-0" />
-            Guide & legend
-          </Link>
+        {/* Help links — below nav with space */}
+        <div className="mt-4 flex flex-col gap-0.5">
+          {HELP_ITEMS.map((item) => {
+            const active = pathname === item.href;
+            const Icon = item.icon;
+            return (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="flex items-center gap-2.5 rounded-md px-2 py-1.5 text-[13px] transition-colors"
+                style={
+                  active
+                    ? { background: "var(--sidebar-active)", color: "var(--foreground)" }
+                    : { color: "var(--muted-foreground)" }
+                }
+                onMouseEnter={(e) => {
+                  if (!active) e.currentTarget.style.background = "var(--sidebar-hover)";
+                }}
+                onMouseLeave={(e) => {
+                  if (!active) e.currentTarget.style.background = "transparent";
+                }}
+              >
+                <Icon className="size-4 shrink-0" />
+                {item.label}
+              </Link>
+            );
+          })}
         </div>
       </nav>
 

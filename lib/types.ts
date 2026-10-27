@@ -1,5 +1,5 @@
 /** Coverage classification for a single Cap1 deal. */
-export type CoverageStatus = "Covered" | "No ASE";
+export type CoverageStatus = "ASE assigned" | "No ASE";
 
 /**
  * One Cap1 deal (one row per opportunity x region x fiscal quarter) with its
@@ -23,10 +23,40 @@ export interface Deal {
   closeDate: string | null;
   cap1Acv: number;
   hasTmr: boolean;
+  /** Optional dated request evidence; independent of activation-tag history. */
+  tmrEvidence?: import("./tmr-evidence").TmrEvidence | null;
   hasActivationTag: boolean;
+  /** Upstream observed date; null is unknown, undefined means the column is absent. */
+  activationObservedDate?: string | null;
   hasUcTeamAse: boolean;
   hasAccountTeamAse: boolean;
   hasAnyAse: boolean;
+  /** Proposed upstream history contract; unavailable until supplied and verified. */
+  firstAseEvidenceAt?: string | null;
+  firstAseEvidenceSource?: string | null;
+  firstAseDistrict?: string | null;
+  firstAseSem?: string | null;
+  aseHistoryComplete?: boolean;
+  /** Query freshness is independent of aggregate refresh and historical completeness. */
+  aseEvidenceCheckedAt?: string | null;
+  /** Live first-known dated evidence, not complete four-signal history. */
+  aseLiveEvidence?: {
+    date: string;
+    source: string;
+    district: string;
+    sem: string;
+    checkedAt: string;
+  };
+  activationHistory?: {
+    firstObservedDate: string | null;
+    previousObservedDate: string | null;
+    useCaseNumber: string | null;
+    status: "OBSERVED_TRANSITION" | "BASELINE_TAGGED" | "NO_HISTORY" | "NO_OBSERVED_ACTIVATION";
+    district: string | null;
+    sem: string | null;
+    checkedAt: string;
+  };
+  refreshedAt?: string | null;
   /** First timestamped ASE evidence on/before the close date (pre-close signal). */
   hasAseByClose: boolean;
   coverageStatus: CoverageStatus;

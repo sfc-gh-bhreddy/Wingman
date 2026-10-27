@@ -1,4 +1,4 @@
-# Wingmate
+# Wingman
 
 Internal tool for routing uncovered FY27 Cap1 deals to the right ASC motion — ASE (1:1), Hybrid (ASE + Bluebird + Webinar), or Bluebird + Webinar. Detects SI/partner/PS involvement and suppresses recommendations accordingly.
 
@@ -14,8 +14,8 @@ Internal tool for routing uncovered FY27 Cap1 deals to the right ASC motion — 
 ### 2. Clone the repo
 
 ```bash
-git clone https://github.com/sfc-gh-bhreddy/Wingmate.git
-cd Wingmate
+git clone https://github.com/sfc-gh-bhreddy/Wingman.git
+cd Wingman
 ```
 
 ### 3. Set up your Snowflake connection
@@ -55,15 +55,16 @@ Open [http://localhost:3000](http://localhost:3000).
 | Overview | FY27 Cap1 coverage summary across all commercial districts |
 | ASE Coverage | Uncovered accounts with suggested play (ASE / Bluebird / Webinar) |
 | DM / SEM / AE / SE Rollup | Coverage breakdown by manager hierarchy |
-| Guide & Legend | Explains all signals, pills, and what SI involved means |
+| Dictionary | Explains all signals, pills, and what SI involved means |
+| How to navigate | Step-by-step: find your account, check the play, open a TMR |
 
 ### Suggested play logic (3-tier ACV routing)
 
 | ACV range | Suggested play | Pill |
 |-----------|---------------|------|
 | Above $65K | ASE 1:1 | ASE |
-| Above $25K through $65K | ASE + Bluebird + Webinar | Hybrid |
-| Up to $25K | Bluebird + Webinar | Bluebird / Webinar |
+| Above $10K through $65K | ASE + Bluebird + Webinar | Hybrid |
+| Up to $10K | Bluebird + Webinar | Bluebird / Webinar |
 
 ### Suppression signals (precedence order)
 
@@ -86,7 +87,7 @@ The app is pre-configured for Snowpark Container Services. The Snowflake connect
 ### 1. Build the Docker image
 
 ```bash
-cd ~/Desktop/Wingmate
+cd ~/Desktop/Wingman
 docker build --platform linux/amd64 -t wingmate:latest .
 ```
 

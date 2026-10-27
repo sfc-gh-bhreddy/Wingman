@@ -14,6 +14,7 @@ const COLUMNS: Array<{ header: string; get: (d: Deal) => unknown }> = [
   { header: "District", get: (d) => d.district },
   { header: "RVP", get: (d) => d.rvp },
   { header: "Owner (AE)", get: (d) => d.owner },
+  { header: "SE", get: (d) => d.leadSe },
   { header: "SE Manager", get: (d) => d.seManager ?? "(No SE manager)" },
   { header: "Opportunity ID", get: (d) => d.opportunityId },
 ];

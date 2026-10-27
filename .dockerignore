@@ -2,6 +2,11 @@ node_modules
 .next
 .git
 .data-cache
+.local-data
+.snowflake
+.cortex-skills
+connections.toml
+*.pem
 .DS_Store
 *.log
 *.md

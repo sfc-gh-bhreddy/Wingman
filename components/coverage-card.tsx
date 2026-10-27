@@ -30,13 +30,13 @@ export function CoverageCard({
       <div className="flex items-baseline justify-between">
         <span className="text-sm font-semibold tracking-tight">{title}</span>
         <span className="text-xs text-muted-foreground">
-          {pct1(pctAnyAse)} covered
+          {pct1(pctAnyAse)} ASE assigned
         </span>
       </div>
       <CoverageBar covered={covered} total={deals} />
       <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
         <span>{deals} Cap1 deals</span>
-        <span>{covered} covered</span>
+        <span>{covered} ASE assigned</span>
         <span>{gap} gap</span>
         <span>{formatUsd(acv)} ACV</span>
         <span>{formatUsd(gapAcv)} gap ACV</span>

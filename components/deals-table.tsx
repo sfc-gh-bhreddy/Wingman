@@ -14,6 +14,7 @@ function exportSelectedCsv(deals: Deal[]) {
     { h: "District", g: (d: Deal) => d.district ?? "" },
     { h: "SE Manager", g: (d: Deal) => d.seManager ?? "" },
     { h: "Owner (AE)", g: (d: Deal) => d.owner ?? "" },
+    { h: "SE", g: (d: Deal) => d.leadSe ?? "" },
     { h: "Quarter", g: (d: Deal) => d.fiscalPeriod },
     { h: "Close Date", g: (d: Deal) => d.closeDate ?? "" },
     { h: "Cap1 ACV", g: (d: Deal) => String(d.cap1Acv) },
@@ -47,6 +48,7 @@ function getValue(deal: Deal, key: string): string | number | null {
     case "district": return deal.district?.toLowerCase() ?? "";
     case "seManager": return deal.seManager?.toLowerCase() ?? "";
     case "owner": return deal.owner?.toLowerCase() ?? "";
+    case "leadSe": return deal.leadSe?.toLowerCase() ?? "";
     case "quarter": return deal.fqNum;
     case "closeDate": return deal.closeDate ?? "";
     case "acv": return deal.cap1Acv;
@@ -63,6 +65,7 @@ function getFilterValue(deal: Deal, key: string): string {
     case "district": return deal.district ?? "(No district)";
     case "seManager": return deal.seManager ?? "(No SE manager)";
     case "owner": return deal.owner ?? "(No owner)";
+    case "leadSe": return deal.leadSe ?? "(No SE)";
     case "quarter": return deal.fiscalQuarter;
     case "status": return deal.coverageStatus;
     default: return "";
@@ -303,7 +306,7 @@ export function DealsTable({
   signalLabels,
 }: {
   deals: Deal[];
-  showColumns?: { district?: boolean; seManager?: boolean; owner?: boolean;  };
+  showColumns?: { district?: boolean; seManager?: boolean; owner?: boolean; leadSe?: boolean; };
   signalLabels?: (deal: Deal) => string[];
 }) {
   const [sort, setSort] = useState<SortState>({ key: "acv", dir: "desc" });
@@ -360,6 +363,7 @@ export function DealsTable({
         (d.district?.toLowerCase().includes(q)) ||
         (d.seManager?.toLowerCase().includes(q)) ||
         (d.owner?.toLowerCase().includes(q)) ||
+        (d.leadSe?.toLowerCase().includes(q)) ||
         (d.region?.toLowerCase().includes(q)) ||
         (regionLabel(d.region).toLowerCase().includes(q))
       );
@@ -403,7 +407,7 @@ export function DealsTable({
           type="text"
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
-          placeholder="Filter by name, district, SE manager, owner..."
+          placeholder="Filter by account, district, SEM, AE, SE..."
           className="w-full max-w-md rounded-lg border border-border bg-background px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
         {(filterText || activeFilterCount > 0) && (
@@ -473,6 +477,7 @@ export function DealsTable({
               {showColumns.owner ? (
                 <FilterableSortHeader label="Owner (AE)" sortKey="owner" filterable {...sharedFilterProps} />
               ) : null}
+              {showColumns.leadSe ? <FilterableSortHeader label="SE" sortKey="leadSe" filterable {...sharedFilterProps} /> : null}
               <FilterableSortHeader label="Quarter" sortKey="quarter" filterable {...sharedFilterProps} />
               <FilterableSortHeader label="Close date" sortKey="closeDate" {...sharedFilterProps} />
               <FilterableSortHeader label="Cap1 ACV" sortKey="acv" className="text-right" {...sharedFilterProps} />
@@ -514,6 +519,7 @@ export function DealsTable({
                 {showColumns.owner ? (
                   <td className="px-3 py-2.5">{dash(d.owner)}</td>
                 ) : null}
+                {showColumns.leadSe ? <td className="px-3 py-2.5">{dash(d.leadSe)}</td> : null}
                 <td className="px-3 py-2.5 whitespace-nowrap">
                   {d.fiscalPeriod}
                   {d.isOpenQuarter ? (
@@ -553,7 +559,7 @@ export function DealsTable({
             {sorted.length === 0 ? (
               <tr>
                 <td
-                  colSpan={9 + Number(Boolean(showColumns.district)) + Number(Boolean(showColumns.seManager)) + Number(Boolean(showColumns.owner)) + Number(Boolean(signalLabels))}
+                  colSpan={9 + Number(Boolean(showColumns.district)) + Number(Boolean(showColumns.seManager)) + Number(Boolean(showColumns.owner)) + Number(Boolean(showColumns.leadSe)) + Number(Boolean(signalLabels))}
                   className="px-4 py-8 text-center text-sm text-muted-foreground"
                 >
                   No deals match the current filter.
