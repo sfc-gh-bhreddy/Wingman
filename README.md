@@ -1,4 +1,4 @@
-# Wingmate
+# Wingman
 
 Internal tool for routing uncovered FY27 Cap1 deals to the right ASC motion — ASE (1:1), Hybrid (ASE + Bluebird + Webinar), or Bluebird + Webinar. Detects SI/partner/PS involvement and suppresses recommendations accordingly.
 
@@ -14,8 +14,8 @@ Internal tool for routing uncovered FY27 Cap1 deals to the right ASC motion — 
 ### 2. Clone the repo
 
 ```bash
-git clone https://github.com/sfc-gh-bhreddy/Wingmate.git
-cd Wingmate
+git clone https://github.com/sfc-gh-bhreddy/Wingman.git
+cd Wingman
 ```
 
 ### 3. Set up your Snowflake connection
@@ -55,7 +55,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | Overview | FY27 Cap1 coverage summary across all commercial districts |
 | ASE Coverage | Uncovered accounts with suggested play (ASE / Bluebird / Webinar) |
 | DM / SEM / AE / SE Rollup | Coverage breakdown by manager hierarchy |
-| Guide & Legend | Explains all signals, pills, and what SI involved means |
+| Dictionary | Explains all signals, pills, and what SI involved means |
+| How to navigate | Step-by-step: find your account, check the play, open a TMR |
 
 ### Suggested play logic (3-tier ACV routing)
 
@@ -86,8 +87,8 @@ The app is pre-configured for Snowpark Container Services. The Snowflake connect
 ### 1. Build the Docker image
 
 ```bash
-cd ~/Desktop/Wingmate
-docker build --platform linux/amd64 -t wingmate:latest .
+cd ~/Desktop/Wingman
+docker build --platform linux/amd64 -t wingman:latest .
 ```
 
 ### 2. Create Snowflake objects and push
@@ -96,8 +97,8 @@ Open `deploy.sql` and run Steps 1-2 to create the image repository. Copy the `re
 
 ```bash
 snow spcs image-registry login --connection "sfcogsops-snowhouse_aws_us_west_2"
-docker tag wingmate:latest <repository_url>/wingmate:latest
-docker push <repository_url>/wingmate:latest
+docker tag wingman:latest <repository_url>/wingman:latest
+docker push <repository_url>/wingman:latest
 ```
 
 ### 3. Create the service
@@ -107,8 +108,8 @@ Run Step 4 in `deploy.sql` to create the service. Step 6 gives you the public UR
 ### 4. Verify
 
 ```sql
-SELECT SYSTEM$GET_SERVICE_STATUS('TEMP.BHREDDY.WINGMATE_SERVICE');
-SHOW ENDPOINTS IN SERVICE TEMP.BHREDDY.WINGMATE_SERVICE;
+SELECT SYSTEM$GET_SERVICE_STATUS('TEMP.BHREDDY.WINGMAN_SERVICE');
+SHOW ENDPOINTS IN SERVICE TEMP.BHREDDY.WINGMAN_SERVICE;
 ```
 
 See `deploy.sql` for the full script including teardown commands.

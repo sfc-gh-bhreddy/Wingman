@@ -2,7 +2,7 @@
 set -e
 
 echo ""
-echo "Wingmate — Setup"
+echo "Wingman — Setup"
 echo "================"
 echo ""
 
