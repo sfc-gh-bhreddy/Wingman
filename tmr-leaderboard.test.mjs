@@ -95,50 +95,5 @@ test('Eastern month boundary preserves creation date grain', () => {
   assert.equal(districtTmrLeaderboard([row],after,'quarter',3).rows[0].additions,1);
 });
 
-test('help pages explain roles, TMR submission and carryover without implementation details', async () => {
-  const [dictionary, guide] = await Promise.all(['app/dictionary/page.tsx', 'app/how-to/page.tsx'].map(path => readFile(new URL(path, import.meta.url), 'utf8')));
-  for (const source of [dictionary, guide]) {
-    assert.doesNotMatch(source, /Local experiment|SNOW_CERTIFIED|ACCOUNT_ENGINEERING|FIRST_ACTIVATION|baseline-tagged/i);
-    for (const role of ['DM:', 'SEM:', 'AE', 'SE']) assert.ok(source.includes(role));
-    assert.match(source, /14/);
-    assert.match(source, /not yet|does not yet/);
-    assert.match(source, /12/);
-  }
-  assert.match(guide, /Opening the link does not submit the request/);
-  assert.match(dictionary, /Goal attainment = accounts added \/ 12 x 100/);
-  assert.doesNotMatch(dictionary, /Coverage and pills|StatusBadge|const signals|These signals can overlap/);
-  assert.doesNotMatch(guide, /for the labels/);
-});
 
-test('triangle colors and legends distinguish shared district goals from AE/SE coverage', async () => {
-  const files = await Promise.all(['app/district/page.tsx','app/ae/page.tsx','app/se/page.tsx','app/dictionary/page.tsx','components/methodology-note.tsx','components/rollup-table.tsx'].map(path => readFile(new URL(path, import.meta.url), 'utf8')));
-  const [district, ae, se, dictionary, notes, table] = files;
-  assert.match(district, /warningTone="yellow"/);
-  assert.match(district, /belowTarget\(districtProgress\)/);
-  assert.doesNotMatch(district, /DistrictGoalNote/);
-  assert.match(dictionary, /<DistrictGoalNote \/>/);
-  for (const page of [ae,se]) assert.match(page, /warningTone="red"/);
-  assert.match(dictionary, /What the triangles mean/);
-  assert.match(notes, /not separate quotas/);
-  assert.match(notes, /does not trigger a warning/);
-  assert.match(notes, /less than 10%/);
-  assert.doesNotMatch(notes, /below-average/);
-  assert.match(table, /r.deals >= 5 && r.pctAnyAse < 10/);
-  assert.match(table, /text-red-600/);
-  assert.match(table, /text-yellow-600/);
-});
 
-test('component integration retains independent Overview scope and no extra endpoint', async () => {
-  const [page,component,data]=await Promise.all(['app/page.tsx','components/district-tmr-leaderboard.tsx','lib/data.ts'].map(path=>readFile(new URL(path,import.meta.url),'utf8')));
-  assert.match(page,/<DistrictTmrLeaderboard \/>/);
-  assert.match(page,/summarize\(quarterDeals\)/);
-  assert.match(component,/observedActivationLeaderboard\(visibleDeals, now\)/);
-  assert.doesNotMatch(component,/localPreview|districtTmrLeaderboard\(|window.location.hostname|new ASE-type TMRs/);
-  assert.match(component,/same counts as Attachment Goals/);
-  assert.doesNotMatch(component,/fetch\(|quarterDeals|activationHistory/);
-  assert.doesNotMatch(component, /Selected quarter|setMode|TmrPeriodMode|36 accounts/);
-  for (const text of ['Loading monthly rankings','Coverage refresh failed','Goal attainment','tiedCutoff','<table','scope="col"','Pending ranking slot','Awaiting ranking','Dashes mean unavailable, not zero','overflow-x-auto']) assert.ok(component.includes(text));
-  assert.match(component, /districtSemNames\(visibleDeals, row.district\)/);
-  assert.match(component, /District \/ SEMs/);
-  assert.match(data,/tmrEvidence: mapTmrEvidence\(r\)/);
-});

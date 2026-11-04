@@ -6,6 +6,8 @@ import { StatusBadge } from "@/components/status-badge";
 import { regionLabel } from "@/lib/constants";
 import { formatUsd, formatDate, dash } from "@/lib/format";
 import type { Deal } from "@/lib/types";
+import { TmrDraftDrawer } from "@/components/tmr-draft-drawer";
+import { isDraftReady } from "@/lib/tmr-draft";
 
 function exportSelectedCsv(deals: Deal[]) {
   const cols = [
@@ -65,7 +67,7 @@ function getFilterValue(deal: Deal, key: string): string {
     case "district": return deal.district ?? "(No district)";
     case "seManager": return deal.seManager ?? "(No SE manager)";
     case "owner": return deal.owner ?? "(No owner)";
-    case "leadSe": return deal.leadSe ?? "(No SE)";
+    case "leadSe": return deal.leadSe ?? "No SE assigned";
     case "quarter": return deal.fiscalQuarter;
     case "status": return deal.coverageStatus;
     default: return "";
@@ -304,16 +306,21 @@ export function DealsTable({
   deals,
   showColumns = {},
   signalLabels,
+  hideTmrLink = false,
 }: {
   deals: Deal[];
   showColumns?: { district?: boolean; seManager?: boolean; owner?: boolean; leadSe?: boolean; };
   signalLabels?: (deal: Deal) => string[];
+  /** Hide the per-row Open TMR column (District Rollup drilldown). */
+  hideTmrLink?: boolean;
 }) {
   const [sort, setSort] = useState<SortState>({ key: "acv", dir: "desc" });
   const [filterText, setFilterText] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [draftDeal, setDraftDeal] = useState<Deal | null>(null);
+  const closeDraft = useCallback(() => setDraftDeal(null), []);
 
   function handleSort(key: string) {
     setSort((prev) => {
@@ -484,7 +491,7 @@ export function DealsTable({
               <FilterableSortHeader label="TTM consumption" sortKey="ytd" className="text-right" {...sharedFilterProps} />
               <FilterableSortHeader label="Status" sortKey="status" filterable {...sharedFilterProps} />
               {signalLabels ? <th className="text-left font-medium px-3 py-2.5">Potential signals</th> : null}
-              <th className="text-left font-medium px-3 py-2.5"></th>
+              {hideTmrLink ? null : <th className="text-left font-medium px-3 py-2.5"></th>}
             </tr>
           </thead>
           <tbody>
@@ -508,7 +515,19 @@ export function DealsTable({
                     ) : null}
                   </button>
                 </td>
-                <td className="px-4 py-2.5 font-medium">{dash(d.accountName)}</td>
+                <td className="px-4 py-2.5 font-medium">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setDraftDeal(d) }}
+                    className="inline-flex items-center gap-1.5 text-left underline decoration-dotted decoration-1 underline-offset-2 hover:opacity-70"
+                    title={isDraftReady(d.tmrDraft) ? "Open the AI-drafted TMR" : "Open TMR details"}
+                  >
+                    {dash(d.accountName)}
+                    {isDraftReady(d.tmrDraft) ? (
+                      <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-label="TMR draft ready" />
+                    ) : null}
+                  </button>
+                </td>
                 <td className="px-3 py-2.5">{regionLabel(d.region)}</td>
                 {showColumns.district ? (
                   <td className="px-3 py-2.5">{dash(d.district)}</td>
@@ -519,7 +538,7 @@ export function DealsTable({
                 {showColumns.owner ? (
                   <td className="px-3 py-2.5">{dash(d.owner)}</td>
                 ) : null}
-                {showColumns.leadSe ? <td className="px-3 py-2.5">{dash(d.leadSe)}</td> : null}
+                {showColumns.leadSe ? <td className="px-3 py-2.5">{d.leadSe ?? <span className="text-muted-foreground">No SE assigned</span>}</td> : null}
                 <td className="px-3 py-2.5 whitespace-nowrap">
                   {d.fiscalPeriod}
                   {d.isOpenQuarter ? (
@@ -543,6 +562,7 @@ export function DealsTable({
                     </div>
                   </td>
                 ) : null}
+                {hideTmrLink ? null : (
                 <td className="px-3 py-2.5">
                   <a
                     href="https://snowflake.elementum.io/services/4860adda-9a4c-460a-8698-2d7884700c55"
@@ -554,12 +574,13 @@ export function DealsTable({
                     Open TMR ↗
                   </a>
                 </td>
+                )}
               </tr>
             ))}
             {sorted.length === 0 ? (
               <tr>
                 <td
-                  colSpan={9 + Number(Boolean(showColumns.district)) + Number(Boolean(showColumns.seManager)) + Number(Boolean(showColumns.owner)) + Number(Boolean(showColumns.leadSe)) + Number(Boolean(signalLabels))}
+                  colSpan={(hideTmrLink ? 8 : 9) + Number(Boolean(showColumns.district)) + Number(Boolean(showColumns.seManager)) + Number(Boolean(showColumns.owner)) + Number(Boolean(showColumns.leadSe)) + Number(Boolean(signalLabels))}
                   className="px-4 py-8 text-center text-sm text-muted-foreground"
                 >
                   No deals match the current filter.
@@ -569,6 +590,7 @@ export function DealsTable({
           </tbody>
         </table>
       </div>
+      {draftDeal ? <TmrDraftDrawer deal={draftDeal} onClose={closeDraft} /> : null}
     </div>
   );
 }

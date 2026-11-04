@@ -29,7 +29,7 @@ interface CoverageState {
 
 const CoverageContext = React.createContext<CoverageState | null>(null);
 
-const CACHE_KEY = "wingmate-agg-v9-upstream-activation";
+const CACHE_KEY = "wingmate-agg-v10-tmr-draft";
 // Matches the server-side disk cache so the browser never shows data older
 // than what the API would serve.
 const CACHE_TTL_MS = 10 * 60 * 1000;

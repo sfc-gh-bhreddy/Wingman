@@ -25,6 +25,8 @@ export interface Deal {
   hasTmr: boolean;
   /** Optional dated request evidence; independent of activation-tag history. */
   tmrEvidence?: import("./tmr-evidence").TmrEvidence | null;
+  /** AI-drafted TMR fields from the aggregate; null when no draft exists. */
+  tmrDraft?: import("./tmr-draft").TmrDraft | null;
   hasActivationTag: boolean;
   /** Upstream observed date; null is unknown, undefined means the column is absent. */
   activationObservedDate?: string | null;

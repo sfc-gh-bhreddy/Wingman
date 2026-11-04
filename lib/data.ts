@@ -1,10 +1,12 @@
 import "server-only";
 import { mapTmrEvidence, type RawTmrEvidence } from "@/lib/tmr-evidence";
+import { mapTmrDraft, type RawTmrDraft } from "@/lib/tmr-draft";
 import { LIVE_EVIDENCE_SQL, createEvidenceLoader, type LiveEvidenceRow } from "@/lib/live-evidence";
 import { querySnowflake, querySnowflakeLongRunning } from "@/lib/snowflake";
 // DT_AGG_WINGMATE pre-filters fiscal year and excluded opps; these imports are
 // kept only for reference (not used in the query).
 // import { ASE_TMR_SPECIALIST_TYPES, EXCLUDED_OPPORTUNITY_IDS, FISCAL_YEAR } from "@/lib/constants";
+import { ASE_TMR_SPECIALIST_TYPES } from "@/lib/constants";
 import type { CoverageStatus, Deal, UserContext } from "@/lib/types";
 
 // LOCAL DEV BUILD. All Snowflake access goes through lib/snowflake.ts, which
@@ -67,7 +69,7 @@ ORDER BY CAP1_ACV DESC
  * which means SPCS can read it without the FIVETRAN blocker.
  */
 
-interface RawDeal extends RawTmrEvidence {
+interface RawDeal extends RawTmrEvidence, RawTmrDraft {
   OPPORTUNITY_ID: string;
   ACCOUNT_ID: string;
   ACCOUNT_NAME: string | null;
@@ -130,6 +132,7 @@ export async function getDeals(): Promise<Deal[]> {
       cap1Acv: r.CAP1_ACV ?? 0,
       hasTmr: tmr,
       tmrEvidence: mapTmrEvidence(r),
+      tmrDraft: mapTmrDraft(r),
       hasActivationTag: Boolean(r.HAS_ACTIVATION_TAG),
       activationObservedDate: r.FIRST_ACTIVATION_OBSERVED_DATE,
       hasUcTeamAse: Boolean(r.HAS_UC_TEAM_ACE),
@@ -169,6 +172,74 @@ export async function getDeals(): Promise<Deal[]> {
 }
 
 export const getLiveEvidence = createEvidenceLoader(() => runQueryLong<LiveEvidenceRow>(LIVE_EVIDENCE_SQL));
+
+/**
+ * First ASE TMR date per account, read directly from the Elementum feed.
+ * Read-only; the aggregate table only carries a HAS_TMR flag, not the date.
+ */
+export const TMR_DATES_SQL = `
+SELECT ACCOUNT_ID, TO_VARCHAR(MIN(REQUEST_CREATED_DATE)::DATE) AS FIRST_TMR_DATE
+FROM SALES.SALES_ENGINEERING.FIELD_SPECIALIST_REQUESTS_DX_ELEMENTUM
+WHERE SPECIALIST_TYPE IN (${ASE_TMR_SPECIALIST_TYPES.map((t) => `'${t.replace(/'/g, "''")}'`).join(", ")})
+  AND ACCOUNT_ID IS NOT NULL
+GROUP BY ACCOUNT_ID
+`;
+
+export async function getTmrDates(): Promise<Record<string, string>> {
+  const rows = await runQuery<{ ACCOUNT_ID: string; FIRST_TMR_DATE: string }>(TMR_DATES_SQL);
+  return Object.fromEntries(rows.map((r) => [r.ACCOUNT_ID, r.FIRST_TMR_DATE]));
+}
+
+/**
+ * Team Capacity and Active accounts, matching the SnowCats BoB dashboard.
+ * Per ASE: load = distinct Active accounts + Pending Pre-Sales + Pending Kickoff
+ * + Stalled rows; TMRs needed = target (MEMBER_CAPACITY, default 15) - load,
+ * floored at 0. Team Capacity = sum of TMRs needed for unfrozen ASEs.
+ * A NULL status counts as Active, as in the dashboard. Read-only.
+ */
+export const ASE_CAPACITY_SQL = `
+WITH bob AS (
+  SELECT OWNER, ACCOUNT_ID, COALESCE(STATUS, 'Active') AS STATUS
+  FROM ACCOUNT_ENGINEERING.SNOWCATS.BOB_CURRENT
+  WHERE OWNER IS NOT NULL
+),
+per_ase AS (
+  SELECT OWNER,
+         COUNT(DISTINCT IFF(STATUS = 'Active', ACCOUNT_ID, NULL)) AS ACTIVE,
+         COUNT(IFF(STATUS IN ('Pending Pre-Sales', 'Pending Kickoff', 'Stalled'), 1, NULL)) AS OTHER_LOAD
+  FROM bob
+  GROUP BY OWNER
+)
+SELECT p.OWNER,
+       p.ACTIVE,
+       GREATEST(COALESCE(c.TARGET_ACCOUNTS, 15) - (p.ACTIVE + p.OTHER_LOAD), 0) AS TMRS_NEEDED,
+       COALESCE(c.FREEZE_CAPACITY, FALSE) AS FROZEN,
+       (SELECT COUNT(DISTINCT IFF(STATUS = 'Active', ACCOUNT_ID, NULL)) FROM bob) AS TEAM_ACTIVE
+FROM per_ase p
+LEFT JOIN ACCOUNT_ENGINEERING.SNOWCATS.MEMBER_CAPACITY c ON c.OWNER = p.OWNER
+ORDER BY p.OWNER
+`;
+
+export interface AseCapacityData {
+  owners: { name: string; active: number; tmrsNeeded: number; frozen: boolean }[];
+  teamCapacity: number;
+  teamActive: number;
+}
+
+export async function getAseCapacity(): Promise<AseCapacityData> {
+  const rows = await runQuery<{ OWNER: string; ACTIVE: number; TMRS_NEEDED: number; FROZEN: boolean; TEAM_ACTIVE: number }>(ASE_CAPACITY_SQL);
+  const owners = rows.map((r) => ({
+    name: r.OWNER,
+    active: Number(r.ACTIVE),
+    tmrsNeeded: Number(r.TMRS_NEEDED),
+    frozen: Boolean(r.FROZEN),
+  }));
+  return {
+    owners,
+    teamCapacity: owners.filter((o) => !o.frozen).reduce((sum, o) => sum + o.tmrsNeeded, 0),
+    teamActive: rows[0] ? Number(rows[0].TEAM_ACTIVE) : 0,
+  };
+}
 
 export const getActivationHistory = createEvidenceLoader(async () => {
   const { existsSync } = await import("node:fs");

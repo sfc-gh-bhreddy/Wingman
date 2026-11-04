@@ -24,7 +24,7 @@ function gzipFor(rows: Deal[]): Buffer {
 export async function GET(req: Request) {
   try {
     const rows = await getCached({
-      name: "coverage-agg-v9-upstream-activation",
+      name: "coverage-agg-v10-tmr-draft",
       ttlMs: COVERAGE_TTL_MS,
       loader: getDeals,
     });

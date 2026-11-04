@@ -59,6 +59,12 @@ export const BLUEBIRD_BLURB =
   "Self-service native app installed in the customer's own Snowflake account. ~15 min to activate, full foundation in ~1 hour. Free, no SLA.";
 
 // ----------------------------------------------------------------------------
+// ASE CAPACITY
+// ----------------------------------------------------------------------------
+/** Target active accounts per ASE. Open capacity = ASEs x this - active accounts. */
+export const ASE_TARGET_ACCOUNTS = 15;
+
+// ----------------------------------------------------------------------------
 // CONSUMPTION STAGE THRESHOLDS
 // ----------------------------------------------------------------------------
 /**
@@ -92,8 +98,8 @@ export interface NavItem {
 export const NAV_ITEMS: NavItem[] = [
   { href: "/", label: "Overview" },
   { href: "/uncovered", label: "ASE Coverage" },
-  { href: "/attachment-goals", label: "Attachment Goals" },
-  { href: "/district", label: "District Rollup" },
+  { href: "/dm", label: "District Rollup" },
+  { href: "/sem", label: "SEM Rollup" },
   { href: "/ae", label: "AE Rollup" },
   { href: "/se", label: "SE Rollup" },
 ];

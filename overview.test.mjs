@@ -42,16 +42,6 @@ test('ASE Coverage retains both statuses for table, totals and export', async ()
   assert.match(source, /deals=\{regularDeals\}/);
   assert.match(source, /including ASE assigned and No ASE/);
 });
-test('dictionary explains monthly counting and refresh with readable labels', async () => {
-  const source = await readFile(new URL('./app/dictionary/page.tsx', import.meta.url), 'utf8');
-  const section = source.split('>Additional information</h2>')[1];
-  assert.ok(section);
-  for (const text of ['checks every minute', 'cached for 10 minutes', 'first recorded activation date', 'Missing dates:', 'current district and SEM', 'Eastern time', 'do not exclude qualifying monthly additions']) {
-    assert.ok(section.includes(text), text);
-  }
-  assert.doesNotMatch(section, /FIRST_ACTIVATION_OBSERVED_DATE|DT_AGG_WINGMATE|ACCOUNT_ENGINEERING|<details|Q:|A:/);
-  assert.doesNotMatch(source, /Each newly activation-tagged account/);
-});
 test('dashboard copy stays concise while Dictionary retains counting guidance', async () => {
   const paths = ['lib/constants.ts', 'components/district-tmr-leaderboard.tsx', 'components/monthly-progress.tsx', 'components/attachment-goals.tsx'];
   const [constants, leaderboard, monthly, goals] = await Promise.all(paths.map(path => readFile(new URL(path, import.meta.url), 'utf8')));

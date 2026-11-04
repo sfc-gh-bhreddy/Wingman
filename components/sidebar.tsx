@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, ListTodo, Building2, Briefcase, BarChart3, BookOpen, Compass } from "lucide-react";
+import { LayoutDashboard, ListTodo, Building2, Briefcase, BarChart3, BookOpen, Compass, Users } from "lucide-react";
 import { APP_TITLE } from "@/lib/constants";
 import { ThemeToggle } from "@/components/theme-toggle";
 
@@ -12,13 +12,13 @@ const NAV_SECTIONS = [
     items: [
       { href: "/", label: "Overview", icon: LayoutDashboard },
       { href: "/uncovered", label: "ASE Coverage", icon: ListTodo },
-      { href: "/attachment-goals", label: "Attachment Goals", icon: BarChart3 },
     ],
   },
   {
     label: "Rollups",
     items: [
-      { href: "/district", label: "District Rollup", icon: Building2 },
+      { href: "/dm", label: "District Rollup", icon: Building2 },
+      { href: "/sem", label: "SEM Rollup", icon: Users },
       { href: "/ae", label: "AE Rollup", icon: Briefcase },
       { href: "/se", label: "SE Rollup", icon: BarChart3 },
     ],

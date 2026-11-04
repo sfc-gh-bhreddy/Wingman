@@ -96,17 +96,7 @@ export function recommend(deal: Deal, today?: Date): Recommendation {
     };
   }
 
-  // Account has both Closed Won On Demand and Capacity opportunities — it is
-  // already consuming in a different motion (Bluebird's On-Demand flip rule).
-  if (deal.isOdFlip) {
-    return {
-      motions: [],
-      bestWebinar: null,
-      drivers: [
-        "OD flip — account already has On Demand and Capacity closed won",
-      ],
-    };
-  }
+  // OD flips are treated like any other Cap1 deal (no suppression).
 
   // Topic 1 (Securing Your Snowflake Account) is the fallback — it's the one
   // thing every brand-new account needs regardless of what else we know.

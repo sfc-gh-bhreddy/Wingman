@@ -11,7 +11,7 @@ export async function register() {
   const { COVERAGE_TTL_MS, CONTEXT_TTL_MS, KEEPALIVE_MS } = constants;
 
   primeCache({ name: "context", ttlMs: CONTEXT_TTL_MS, loader: getUserContext });
-  primeCache({ name: "coverage-agg-v9-upstream-activation", ttlMs: COVERAGE_TTL_MS, loader: getDeals });
+  primeCache({ name: "coverage-agg-v10-tmr-draft", ttlMs: COVERAGE_TTL_MS, loader: getDeals });
 
   setInterval(() => void pingConnection(), KEEPALIVE_MS).unref?.();
 

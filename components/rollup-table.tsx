@@ -12,6 +12,8 @@ function needsAttention(r: RollupRow): boolean {
 }
 
 // --- Sorting ---
+// Per-render lookup for the optional "added" column so sortRows stays a plain function.
+let addedCache = new WeakMap<RollupRow, number>();
 type SortDir = "asc" | "desc" | null;
 interface SortState { key: string; dir: SortDir }
 
@@ -24,6 +26,7 @@ function getRollupValue(row: RollupRow, key: string): string | number | null {
     case "byClose": return row.pctByClose;
     case "gap": return row.gap;
     case "gapAcv": return row.gapAcv;
+    case "added": return addedCache.get(row) ?? null;
     default: return null;
   }
 }
@@ -159,14 +162,20 @@ export function RollupTable({
   dimensionLabel,
   rows,
   hrefFor,
-  monthlyFor,
-  warningTone = "yellow",
+  addedFor,
+  addedLabel = "ASE TMRs added",
+  showWarning = true,
+  warningTone = "red",
 }: {
   dimensionLabel: string;
   rows: RollupRow[];
   hrefFor?: (row: RollupRow) => string | null;
   warningTone?: "yellow" | "red";
-  monthlyFor?: (row: RollupRow) => { warning: boolean; label: string };
+  /** Optional count column (e.g. ASE TMRs added this quarter); null renders a dash. */
+  addedFor?: (row: RollupRow) => number | null;
+  addedLabel?: string;
+  /** AE and SE rollups keep the red low-coverage triangle; DM and SEM rollups turn it off. */
+  showWarning?: boolean;
 }) {
   const [sort, setSort] = useState<SortState>({ key: "", dir: null });
   const [filterText, setFilterText] = useState("");
@@ -196,7 +205,10 @@ export function RollupTable({
     return result;
   }, [rows, filterText, labelFilter]);
 
-  const sorted = useMemo(() => sortRows(filtered, sort), [filtered, sort]);
+  const sorted = useMemo(() => {
+    addedCache = new WeakMap(rows.map((r) => [r, addedFor?.(r) ?? null] as const).filter(([, v]) => v !== null) as [RollupRow, number][]);
+    return sortRows(filtered, sort);
+  }, [filtered, sort, rows, addedFor]);
 
   const hasFilter = labelFilter !== undefined;
 
@@ -269,14 +281,18 @@ export function RollupTable({
               <th className="text-right font-medium px-3 py-2.5 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => handleSort("gapAcv")}>
                 Gap ACV <SortArrow active={sort.key === "gapAcv" && sort.dir !== null} dir={sort.key === "gapAcv" ? sort.dir : null} />
               </th>
-              {monthlyFor && <th className="text-left font-medium px-3 py-2.5">Monthly target</th>}
+              {addedFor && (
+                <th className="text-right font-medium px-3 py-2.5 cursor-pointer select-none hover:text-foreground transition-colors" onClick={() => handleSort("added")}>
+                  {addedLabel} <SortArrow active={sort.key === "added" && sort.dir !== null} dir={sort.key === "added" ? sort.dir : null} />
+                </th>
+              )}
             </tr>
           </thead>
           <tbody>
             {sorted.map((r) => {
               const href = hrefFor?.(r) ?? null;
-              const monthly = monthlyFor?.(r);
-              const attn = monthly ? monthly.warning : needsAttention(r);
+              const added = addedFor?.(r);
+              const attn = showWarning && needsAttention(r);
               return (
                 <tr
                   key={r.key}
@@ -297,7 +313,7 @@ export function RollupTable({
                         <span className="font-medium">{r.label}</span>
                       )}
                       {attn ? (
-                        <AlertTriangle className={`size-3.5 shrink-0 ${warningTone === "red" ? "text-red-600 dark:text-red-400" : "text-yellow-600 dark:text-yellow-400"}`} aria-label={monthly ? "District below monthly target" : "Low ASE coverage: 5 or more deals and under 10 percent covered"} />
+                        <AlertTriangle className={`size-3.5 shrink-0 ${warningTone === "red" ? "text-red-600 dark:text-red-400" : "text-yellow-600 dark:text-yellow-400"}`} aria-label="Low ASE coverage: 5 or more deals and under 10 percent covered" />
                       ) : null}
                       {r.allOpenQuarter ? (
                         <span className="text-[10px] text-muted-foreground">(open qtr)</span>
@@ -317,13 +333,13 @@ export function RollupTable({
                   <td className="px-3 py-2.5 text-right tabular-nums">{pct1(r.pctByClose)}</td>
                   <td className="px-3 py-2.5 text-right tabular-nums">{r.gap}</td>
                   <td className="px-3 py-2.5 text-right tabular-nums">{formatUsd(r.gapAcv)}</td>
-                  {monthly && <td className="px-3 py-2.5 text-xs">{monthly.label}</td>}
+                  {addedFor && <td className="px-3 py-2.5 text-right tabular-nums">{added == null ? "\u2014" : added}</td>}
                 </tr>
               );
             })}
             {sorted.length === 0 ? (
               <tr>
-                <td colSpan={monthlyFor ? 8 : 7} className="px-4 py-8 text-center text-sm text-muted-foreground">
+                <td colSpan={addedFor ? 8 : 7} className="px-4 py-8 text-center text-sm text-muted-foreground">
                   No rows match the current filter.
                 </td>
               </tr>

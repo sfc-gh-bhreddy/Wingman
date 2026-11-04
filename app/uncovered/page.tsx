@@ -18,7 +18,6 @@ const REVIEW_SIGNALS = [
   { label: "Partner involved", matches: (deal: Deal) => deal.isPartnerInvolved },
   { label: "PS involved", matches: (deal: Deal) => deal.isPsInvolved },
   { label: "Partner acct", matches: (deal: Deal) => deal.isPartnerAccount },
-  { label: "OD flip", matches: (deal: Deal) => deal.isOdFlip },
 ];
 
 function signalLabels(deal: Deal): string[] {
@@ -98,6 +97,11 @@ function UncoveredInner() {
     count: [...accountSignals.values()].filter((labels) => labels.has(signal.label)).length,
   })).filter((signal) => signal.count > 0);
   const s = summarize(filtered);
+  // AE Rollup drill: show the account's SE instead of the AE (already the filter) and no Open TMR link.
+  const tableColumns = drillOwner
+    ? { district: true, seManager: true, leadSe: true }
+    : { district: true, seManager: true, owner: true };
+  const hideTmrLink = Boolean(drillDistrict || drillOwner);
 
   return (
     <>
@@ -148,13 +152,14 @@ function UncoveredInner() {
         {isPersonDrill ? <h2 className="text-sm font-semibold">Accounts without review signals ({new Set(regularDeals.map((deal) => deal.accountId)).size})</h2> : null}
         <DealsTable
           deals={regularDeals}
-          showColumns={{ district: true, seManager: true, owner: true }}
+          showColumns={tableColumns}
+          hideTmrLink={hideTmrLink}
         />
         {isPersonDrill ? (
           <section className="flex flex-col gap-3 border-t border-border pt-5" aria-label="Accounts with potential involvement">
             <h2 className="text-sm font-semibold">Accounts with potential involvement ({reviewAccountCount})</h2>
             <p className="text-xs text-muted-foreground">
-              These accounts have potential SI, partner, PS, partner-account, or OD-flip signals. Signals can overlap and do not confirm that the account is fully supported. Review each account and add an ASE if needed.
+              These accounts have potential SI, partner, PS, or partner-account signals. Signals can overlap and do not confirm that the account is fully supported. Review each account and add an ASE if needed.
             </p>
             {signalCounts.length > 0 ? (
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
@@ -163,8 +168,9 @@ function UncoveredInner() {
             ) : null}
             <DealsTable
               deals={reviewDeals}
-              showColumns={{ district: true, seManager: true, owner: true }}
+              showColumns={tableColumns}
               signalLabels={(deal) => [...(accountSignals.get(deal.accountId) ?? [])]}
+              hideTmrLink={hideTmrLink}
             />
             <p className="text-xs text-muted-foreground">
               Potential involvement is a review cue, not a reason to skip outreach. Add ASE support if the account still needs it.
