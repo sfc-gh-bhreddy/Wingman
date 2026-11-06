@@ -88,20 +88,17 @@ test('ASE capacity = ASEs x 15 - active, negative means over capacity', async ()
   assert.equal(aseCapacity(0, 0).open, 0);
 });
 
-test('capacity query is read-only from bob_current; open capacity uses Active, card also shows Pending Kickoff and Stalled', async () => {
-  const [data, constants, overview, card] = await Promise.all(['lib/data.ts', 'lib/constants.ts', 'app/page.tsx', 'components/ase-capacity-card.tsx'].map(p => readFile(new URL(p, import.meta.url), 'utf8')));
+test('capacity query is read-only from bob_current; card shows Team Capacity then Active accounts', async () => {
+  const [data, overview, card] = await Promise.all(['lib/data.ts', 'app/page.tsx', 'components/ase-capacity-card.tsx'].map(p => readFile(new URL(p, import.meta.url), 'utf8')));
   const sql = data.split('ASE_CAPACITY_SQL = `')[1].split('`;')[0];
   assert.match(sql, /ACCOUNT_ENGINEERING\.SNOWCATS\.BOB_CURRENT/);
-  assert.match(sql, /COUNT\(DISTINCT IFF\(STATUS = 'Active', ACCOUNT_ID, NULL\)\) AS TEAM_ACTIVE/);
-  assert.match(sql, /STATUS = 'Pending Kickoff'.*TEAM_PENDING/s);
-  assert.match(sql, /STATUS = 'Stalled'.*TEAM_STALLED/s);
+  assert.match(sql, /ACCOUNT_ENGINEERING\.SNOWCATS\.MEMBER_CAPACITY/);
+  assert.match(sql, /COUNT\(DISTINCT IFF\(STATUS = 'Active', ACCOUNT_ID, NULL\)\) FROM bob\) AS TEAM_ACTIVE/);
+  assert.match(sql, /GREATEST\(COALESCE\(c\.TARGET_ACCOUNTS, 15\) - \(p\.ACTIVE \+ p\.OTHER_LOAD\), 0\) AS TMRS_NEEDED/);
   assert.doesNotMatch(sql, /\b(INSERT|UPDATE|DELETE|MERGE|CREATE)\b/);
-  assert.match(constants, /ASE_TARGET_ACCOUNTS = 15/);
+  assert.match(data, /filter\(\(o\) => !o\.frozen\)/);
   assert.match(overview, /<AseCapacityCard \/>/);
-  assert.match(card, /aseCapacity\(data\.owners\.length, data\.teamActive\)/);
-  assert.match(card, /Pending kickoff/);
-  assert.match(card, /Stalled/);
-  assert.match(card, /Source: ASE book of business \(ACCOUNT_ENGINEERING\.SNOWCATS\.BOB_CURRENT\)/);
+  assert.ok(card.indexOf('label="Team Capacity"') < card.indexOf('label="Active accounts"'));
 });
 
 test('District and AE Rollup drilldowns hide the Open TMR column; AE drill shows SE', async () => {

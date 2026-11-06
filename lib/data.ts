@@ -114,8 +114,33 @@ function coverageStatus(anyAce: boolean): CoverageStatus {
   return anyAce ? "ASE assigned" : "No ASE";
 }
 
+/**
+ * Opportunity owners whose Workday title has no "Account Executive" (e.g. District
+ * Managers credited on a booking). They are cleared from `owner` so they never show
+ * up as an AE; their deals fall under "(No owner)". A name only counts as non-AE if
+ * no matching person has an AE title. Owners with no Workday match are kept.
+ */
+export const NON_AE_OWNERS_SQL = `
+SELECT u.NAME AS OWNER
+FROM SALES.SALES_ENGINEERING.USER_DATA u
+WHERE u.NAME IN (SELECT DISTINCT OWNER FROM ACCOUNT_ENGINEERING.PIPELINE.DT_AGG_WINGMATE WHERE OWNER IS NOT NULL)
+GROUP BY u.NAME
+HAVING MAX(IFF(u.BUSINESS_TITLE_WD ILIKE '%Account Executive%', 1, 0)) = 0
+`;
+
+async function getNonAeOwners(): Promise<Set<string>> {
+  try {
+    const rows = await runQuery<{ OWNER: string }>(NON_AE_OWNERS_SQL);
+    return new Set(rows.map((r) => r.OWNER));
+  } catch (error) {
+    // Title lookup is a cleanup step; never block the deal list on it.
+    console.error("[data] non-AE owner lookup failed; showing owners as-is", error);
+    return new Set();
+  }
+}
+
 export async function getDeals(): Promise<Deal[]> {
-  const rows = await runQueryLong<RawDeal>(DEALS_SQL);
+  const [rows, nonAeOwners] = await Promise.all([runQueryLong<RawDeal>(DEALS_SQL), getNonAeOwners()]);
   return rows.map((r) => {
     const anyAce = Boolean(r.HAS_ANY_ACE);
     const tmr = Boolean(r.HAS_TMR);
@@ -149,7 +174,7 @@ export async function getDeals(): Promise<Deal[]> {
       coverageStatus: coverageStatus(anyAce),
       district: r.DISTRICT,
       rvp: r.RVP,
-      owner: r.OWNER,
+      owner: r.OWNER && nonAeOwners.has(r.OWNER) ? null : r.OWNER,
       seManager: r.SE_MANAGER,
       leadSe: r.LEAD_SE,
       assignedAse: r.ASSIGNED_ACE,

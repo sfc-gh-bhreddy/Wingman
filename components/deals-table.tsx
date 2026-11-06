@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback, type ReactNode } from "react";
 import { ChevronDown, Download } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 import { regionLabel } from "@/lib/constants";
@@ -307,12 +307,15 @@ export function DealsTable({
   showColumns = {},
   signalLabels,
   hideTmrLink = false,
+  renderStatus,
 }: {
   deals: Deal[];
   showColumns?: { district?: boolean; seManager?: boolean; owner?: boolean; leadSe?: boolean; };
   signalLabels?: (deal: Deal) => string[];
   /** Hide the per-row Open TMR column (District Rollup drilldown). */
   hideTmrLink?: boolean;
+  /** Replace the Status badge (e.g. an editable status on AE/SE drill-downs). */
+  renderStatus?: (deal: Deal) => ReactNode;
 }) {
   const [sort, setSort] = useState<SortState>({ key: "acv", dir: "desc" });
   const [filterText, setFilterText] = useState("");
@@ -548,8 +551,8 @@ export function DealsTable({
                 <td className="px-3 py-2.5 whitespace-nowrap">{formatDate(d.closeDate)}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{formatUsd(d.cap1Acv)}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{formatUsd(d.ytdConsumption)}</td>
-                <td className="px-3 py-2.5">
-                  <StatusBadge status={d.coverageStatus} />
+                <td className="px-3 py-2.5" onClick={renderStatus ? (e) => e.stopPropagation() : undefined}>
+                  {renderStatus ? renderStatus(d) : <StatusBadge status={d.coverageStatus} />}
                 </td>
                 {signalLabels ? (
                   <td className="px-3 py-2.5">

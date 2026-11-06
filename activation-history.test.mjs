@@ -102,7 +102,7 @@ test('production reads upstream activation in base payload and skips the experim
  const provider = readFileSync(new URL('./components/coverage-provider.tsx', import.meta.url),'utf8');
  assert.match(data,/activationObservedDate: r.FIRST_ACTIVATION_OBSERVED_DATE/);
  assert.match(provider,/if \(hasUpstreamActivation\) \{[\s\S]*?return;/);
- assert.match(provider,/v10-tmr-draft/);
+ assert.match(provider,/v11-ae-owner/);
 });
 test('history query computes account first observation before month filtering',()=>{
  assert.match(ACTIVATION_HISTORY_SQL,/SNP_SALESFORCE_USE_CASE/);
