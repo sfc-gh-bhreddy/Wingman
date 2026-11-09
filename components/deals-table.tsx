@@ -1,11 +1,13 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect, useCallback } from "react";
+import { useState, useMemo, useRef, useEffect, useCallback, type ReactNode } from "react";
 import { ChevronDown, Download } from "lucide-react";
 import { StatusBadge } from "@/components/status-badge";
 import { regionLabel } from "@/lib/constants";
 import { formatUsd, formatDate, dash } from "@/lib/format";
 import type { Deal } from "@/lib/types";
+import { TmrDraftDrawer } from "@/components/tmr-draft-drawer";
+import { isDraftReady } from "@/lib/tmr-draft";
 
 function exportSelectedCsv(deals: Deal[]) {
   const cols = [
@@ -14,6 +16,7 @@ function exportSelectedCsv(deals: Deal[]) {
     { h: "District", g: (d: Deal) => d.district ?? "" },
     { h: "SE Manager", g: (d: Deal) => d.seManager ?? "" },
     { h: "Owner (AE)", g: (d: Deal) => d.owner ?? "" },
+    { h: "SE", g: (d: Deal) => d.leadSe ?? "" },
     { h: "Quarter", g: (d: Deal) => d.fiscalPeriod },
     { h: "Close Date", g: (d: Deal) => d.closeDate ?? "" },
     { h: "Cap1 ACV", g: (d: Deal) => String(d.cap1Acv) },
@@ -47,6 +50,7 @@ function getValue(deal: Deal, key: string): string | number | null {
     case "district": return deal.district?.toLowerCase() ?? "";
     case "seManager": return deal.seManager?.toLowerCase() ?? "";
     case "owner": return deal.owner?.toLowerCase() ?? "";
+    case "leadSe": return deal.leadSe?.toLowerCase() ?? "";
     case "quarter": return deal.fqNum;
     case "closeDate": return deal.closeDate ?? "";
     case "acv": return deal.cap1Acv;
@@ -63,6 +67,7 @@ function getFilterValue(deal: Deal, key: string): string {
     case "district": return deal.district ?? "(No district)";
     case "seManager": return deal.seManager ?? "(No SE manager)";
     case "owner": return deal.owner ?? "(No owner)";
+    case "leadSe": return deal.leadSe ?? "No SE assigned";
     case "quarter": return deal.fiscalQuarter;
     case "status": return deal.coverageStatus;
     default: return "";
@@ -301,16 +306,24 @@ export function DealsTable({
   deals,
   showColumns = {},
   signalLabels,
+  hideTmrLink = false,
+  renderStatus,
 }: {
   deals: Deal[];
-  showColumns?: { district?: boolean; seManager?: boolean; owner?: boolean;  };
+  showColumns?: { district?: boolean; seManager?: boolean; owner?: boolean; leadSe?: boolean; };
   signalLabels?: (deal: Deal) => string[];
+  /** Hide the per-row Open TMR column (District Rollup drilldown). */
+  hideTmrLink?: boolean;
+  /** Replace the Status badge (e.g. an editable status on AE/SE drill-downs). */
+  renderStatus?: (deal: Deal) => ReactNode;
 }) {
   const [sort, setSort] = useState<SortState>({ key: "acv", dir: "desc" });
   const [filterText, setFilterText] = useState("");
   const [columnFilters, setColumnFilters] = useState<ColumnFilters>({});
   const [openFilter, setOpenFilter] = useState<string | null>(null);
   const [selected, setSelected] = useState<Set<string>>(new Set());
+  const [draftDeal, setDraftDeal] = useState<Deal | null>(null);
+  const closeDraft = useCallback(() => setDraftDeal(null), []);
 
   function handleSort(key: string) {
     setSort((prev) => {
@@ -360,6 +373,7 @@ export function DealsTable({
         (d.district?.toLowerCase().includes(q)) ||
         (d.seManager?.toLowerCase().includes(q)) ||
         (d.owner?.toLowerCase().includes(q)) ||
+        (d.leadSe?.toLowerCase().includes(q)) ||
         (d.region?.toLowerCase().includes(q)) ||
         (regionLabel(d.region).toLowerCase().includes(q))
       );
@@ -403,7 +417,7 @@ export function DealsTable({
           type="text"
           value={filterText}
           onChange={(e) => setFilterText(e.target.value)}
-          placeholder="Filter by name, district, SE manager, owner..."
+          placeholder="Filter by account, district, SEM, AE, SE..."
           className="w-full max-w-md rounded-lg border border-border bg-background px-3 py-1.5 text-sm placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring"
         />
         {(filterText || activeFilterCount > 0) && (
@@ -473,13 +487,14 @@ export function DealsTable({
               {showColumns.owner ? (
                 <FilterableSortHeader label="Owner (AE)" sortKey="owner" filterable {...sharedFilterProps} />
               ) : null}
+              {showColumns.leadSe ? <FilterableSortHeader label="SE" sortKey="leadSe" filterable {...sharedFilterProps} /> : null}
               <FilterableSortHeader label="Quarter" sortKey="quarter" filterable {...sharedFilterProps} />
               <FilterableSortHeader label="Close date" sortKey="closeDate" {...sharedFilterProps} />
               <FilterableSortHeader label="Cap1 ACV" sortKey="acv" className="text-right" {...sharedFilterProps} />
               <FilterableSortHeader label="TTM consumption" sortKey="ytd" className="text-right" {...sharedFilterProps} />
               <FilterableSortHeader label="Status" sortKey="status" filterable {...sharedFilterProps} />
               {signalLabels ? <th className="text-left font-medium px-3 py-2.5">Potential signals</th> : null}
-              <th className="text-left font-medium px-3 py-2.5"></th>
+              {hideTmrLink ? null : <th className="text-left font-medium px-3 py-2.5"></th>}
             </tr>
           </thead>
           <tbody>
@@ -503,7 +518,19 @@ export function DealsTable({
                     ) : null}
                   </button>
                 </td>
-                <td className="px-4 py-2.5 font-medium">{dash(d.accountName)}</td>
+                <td className="px-4 py-2.5 font-medium">
+                  <button
+                    type="button"
+                    onClick={(e) => { e.stopPropagation(); setDraftDeal(d) }}
+                    className="inline-flex items-center gap-1.5 text-left underline decoration-dotted decoration-1 underline-offset-2 hover:opacity-70"
+                    title={isDraftReady(d.tmrDraft) ? "Open the AI-drafted TMR" : "Open TMR details"}
+                  >
+                    {dash(d.accountName)}
+                    {isDraftReady(d.tmrDraft) ? (
+                      <span className="size-1.5 shrink-0 rounded-full bg-emerald-500" aria-label="TMR draft ready" />
+                    ) : null}
+                  </button>
+                </td>
                 <td className="px-3 py-2.5">{regionLabel(d.region)}</td>
                 {showColumns.district ? (
                   <td className="px-3 py-2.5">{dash(d.district)}</td>
@@ -514,6 +541,7 @@ export function DealsTable({
                 {showColumns.owner ? (
                   <td className="px-3 py-2.5">{dash(d.owner)}</td>
                 ) : null}
+                {showColumns.leadSe ? <td className="px-3 py-2.5">{d.leadSe ?? <span className="text-muted-foreground">No SE assigned</span>}</td> : null}
                 <td className="px-3 py-2.5 whitespace-nowrap">
                   {d.fiscalPeriod}
                   {d.isOpenQuarter ? (
@@ -523,8 +551,8 @@ export function DealsTable({
                 <td className="px-3 py-2.5 whitespace-nowrap">{formatDate(d.closeDate)}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{formatUsd(d.cap1Acv)}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{formatUsd(d.ytdConsumption)}</td>
-                <td className="px-3 py-2.5">
-                  <StatusBadge status={d.coverageStatus} />
+                <td className="px-3 py-2.5" onClick={renderStatus ? (e) => e.stopPropagation() : undefined}>
+                  {renderStatus ? renderStatus(d) : <StatusBadge status={d.coverageStatus} />}
                 </td>
                 {signalLabels ? (
                   <td className="px-3 py-2.5">
@@ -537,6 +565,7 @@ export function DealsTable({
                     </div>
                   </td>
                 ) : null}
+                {hideTmrLink ? null : (
                 <td className="px-3 py-2.5">
                   <a
                     href="https://snowflake.elementum.io/services/4860adda-9a4c-460a-8698-2d7884700c55"
@@ -548,12 +577,13 @@ export function DealsTable({
                     Open TMR ↗
                   </a>
                 </td>
+                )}
               </tr>
             ))}
             {sorted.length === 0 ? (
               <tr>
                 <td
-                  colSpan={9 + Number(Boolean(showColumns.district)) + Number(Boolean(showColumns.seManager)) + Number(Boolean(showColumns.owner)) + Number(Boolean(signalLabels))}
+                  colSpan={(hideTmrLink ? 8 : 9) + Number(Boolean(showColumns.district)) + Number(Boolean(showColumns.seManager)) + Number(Boolean(showColumns.owner)) + Number(Boolean(showColumns.leadSe)) + Number(Boolean(signalLabels))}
                   className="px-4 py-8 text-center text-sm text-muted-foreground"
                 >
                   No deals match the current filter.
@@ -563,6 +593,7 @@ export function DealsTable({
           </tbody>
         </table>
       </div>
+      {draftDeal ? <TmrDraftDrawer deal={draftDeal} onClose={closeDraft} /> : null}
     </div>
   );
 }

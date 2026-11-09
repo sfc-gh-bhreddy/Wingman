@@ -96,17 +96,7 @@ export function recommend(deal: Deal, today?: Date): Recommendation {
     };
   }
 
-  // Account has both Closed Won On Demand and Capacity opportunities — it is
-  // already consuming in a different motion (Bluebird's On-Demand flip rule).
-  if (deal.isOdFlip) {
-    return {
-      motions: [],
-      bestWebinar: null,
-      drivers: [
-        "OD flip — account already has On Demand and Capacity closed won",
-      ],
-    };
-  }
+  // OD flips are treated like any other Cap1 deal (no suppression).
 
   // Topic 1 (Securing Your Snowflake Account) is the fallback — it's the one
   // thing every brand-new account needs regardless of what else we know.
@@ -124,24 +114,24 @@ export function recommend(deal: Deal, today?: Date): Recommendation {
 
   const webinar = bestSessionForTopic(topicId, today);
 
-  // Above $25K through $65K: consider hybrid coverage.
+  // Above $10K through $65K: consider hybrid coverage.
   if (cap1Acv > HYBRID_MIN_ACV) {
     return {
       motions: ["ASE", "Bluebird", "Webinar"],
       bestWebinar: webinar,
       drivers: [
-        `Cap1 ACV ${fmtAcv(cap1Acv)} — above $25K through $65K, consider hybrid support`,
+        `Cap1 ACV ${fmtAcv(cap1Acv)} — above $10K through $65K, consider hybrid support`,
         "Consider 1:1 ASE alongside Bluebird and a webinar",
       ],
     };
   }
 
-  // Up to and including $25K: primarily Bluebird + Webinar.
+  // Up to and including $10K: primarily Bluebird + Webinar.
   return {
     motions: ["Bluebird", "Webinar"],
     bestWebinar: webinar,
     drivers: [
-      `Cap1 ACV ${fmtAcv(cap1Acv)} — up to $25K, primarily Bluebird`,
+      `Cap1 ACV ${fmtAcv(cap1Acv)} — up to $10K, primarily Bluebird`,
       consumptionStage === "Not Started"
         ? "Not started — no consumption since close"
         : consumptionStage === "Ramping"

@@ -451,6 +451,7 @@ function queryWithPool(
   query: string,
   authTag: string,
   warehouse?: string,
+  binds?: QueryOptions["binds"],
 ): Promise<Record<string, any>[]> {
   return pool.use(async (conn) => {
     await activateSecondaryRoles(conn)
@@ -459,6 +460,7 @@ function queryWithPool(
     return new Promise<Record<string, any>[]>((res, rej) => {
       conn.execute({
         sqlText: query,
+        ...(binds ? { binds: binds as any } : {}),
         ...warehouseParams(warehouse),
         complete: (err, stmt, rows) => {
           const ms = Date.now() - t0
@@ -569,6 +571,8 @@ interface QueryOptions {
    * default warehouse is used.
    */
   warehouse?: string
+  /** Positional bind values for `?` placeholders. Use for any user-supplied input. */
+  binds?: (string | number | boolean | null)[]
 }
 
 /** Extra options for `querySnowflakeLongRunning` / `queryWithTokenLongRunning`. */
@@ -597,7 +601,7 @@ function resolveLongRunningOpts(
 }
 
 export async function querySnowflake(query: string, options: QueryOptions = {}): Promise<Record<string, any>[]> {
-  const { callersRights = false, warehouse } = options
+  const { callersRights = false, warehouse, binds } = options
   const serviceToken = getServiceToken()
 
   if (serviceToken) {
@@ -609,18 +613,18 @@ export async function querySnowflake(query: string, options: QueryOptions = {}):
         )
       }
       const combinedToken = serviceToken + "." + callerToken
-      return queryWithPool(getCallersPool(combinedToken, serviceToken), query, "spcs-caller", warehouse)
+      return queryWithPool(getCallersPool(combinedToken, serviceToken), query, "spcs-caller", warehouse, binds)
     }
     // Retry once on terminated connection (service token rotated mid-flight).
     try {
-      return await queryWithPool(getOwnersPool(serviceToken), query, "spcs-owner", warehouse)
+      return await queryWithPool(getOwnersPool(serviceToken), query, "spcs-owner", warehouse, binds)
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err)
       if (msg.includes("terminated connection")) {
         sfLog("query retry: terminated connection — clearing owner pool and retrying once")
         ownersPool?.drain()
         ownersPool = null
-        return queryWithPool(getOwnersPool(serviceToken), query, "spcs-owner", warehouse)
+        return queryWithPool(getOwnersPool(serviceToken), query, "spcs-owner", warehouse, binds)
       }
       throw err
     }
@@ -633,13 +637,13 @@ export async function querySnowflake(query: string, options: QueryOptions = {}):
 
   // Explicit env vars: password auth via pooled connections
   if (process.env.SNOWFLAKE_USER && process.env.SNOWFLAKE_PASSWORD) {
-    return queryWithPool(getPasswordPool(), query, "password", warehouse)
+    return queryWithPool(getPasswordPool(), query, "password", warehouse, binds)
   }
 
   // ~/.snowflake/connections.toml or config.toml: use the default connection (local dev)
   const tomlConn = readTomlDefaultConnection()
   if (tomlConn) {
-    return queryWithPool(getTomlPool(tomlConn), query, "toml", warehouse)
+    return queryWithPool(getTomlPool(tomlConn), query, "toml", warehouse, binds)
   }
 
   throw new Error(

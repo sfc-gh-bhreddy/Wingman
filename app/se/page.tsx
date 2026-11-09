@@ -18,6 +18,7 @@ export default function SeRollupPage() {
     >
       <div className="flex flex-col gap-4">
         <RollupTable
+          warningTone="red"
           dimensionLabel="Lead SE"
           rows={rows}
           hrefFor={(r) => `/uncovered?se=${encodeURIComponent(r.key)}`}

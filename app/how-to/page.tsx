@@ -3,105 +3,39 @@ import Link from "next/link";
 
 export const metadata: Metadata = { title: "How to navigate" };
 
-function Step({ n, title, children }: { n: number; title: string; children: React.ReactNode }) {
-  return (
-    <div className="flex gap-4">
-      <div
-        className="flex size-7 shrink-0 items-center justify-center rounded-full text-[13px] font-semibold"
-        style={{ background: "var(--brand-primary)", color: "#fff" }}
-      >
-        {n}
-      </div>
-      <div className="flex flex-col gap-1.5 pt-0.5">
-        <h2 className="text-[15px] font-semibold tracking-tight">{title}</h2>
-        <div className="text-sm text-muted-foreground leading-relaxed">{children}</div>
-      </div>
-    </div>
-  );
-}
-
 function PageLink({ href, children }: { href: string; children: React.ReactNode }) {
-  return (
-    <Link href={href} className="font-medium text-foreground underline decoration-1 underline-offset-2 hover:opacity-70">
-      {children}
-    </Link>
-  );
+  return <Link href={href} className="font-medium text-primary hover:underline">{children}</Link>;
 }
 
 export default function HowToPage() {
   return (
-    <main className="w-full max-w-2xl mx-auto py-10 px-8">
-      <h1 className="text-2xl font-bold tracking-tight mb-1">How to navigate</h1>
-      <p className="text-sm text-muted-foreground mb-8">
-        Find your accounts, check the suggested play, and open a TMR. That&apos;s it.
-      </p>
-
-      {/* The short version */}
-      <div
-        className="rounded-xl border px-5 py-4 mb-8 text-sm leading-relaxed"
-        style={{ borderColor: "var(--border)", background: "var(--card)" }}
-      >
-        <p>
-          <strong>Go to your account and open a TMR — we&apos;ll handle the rest.</strong> You
-          don&apos;t need to pick the ASE, plan the engagement, or decide between Bluebird and a
-          webinar. Once the TMR is in, the ASC team reviews it, assigns the right person, and
-          reaches out.
-        </p>
+    <main className="mx-auto w-full max-w-3xl px-6 py-10">
+      <h1 className="mb-2 text-2xl font-bold tracking-tight">How to navigate</h1>
+      <p className="mb-7 text-sm text-muted-foreground">Find your book, review coverage, and request ASE support.</p>
+      <div className="mb-7 rounded-xl border border-border bg-card p-5 text-sm">
+        <h2 className="font-semibold">Need an ASE? Submit a TMR.</h2>
+        <p className="mt-2 text-muted-foreground">Find the account on <PageLink href="/uncovered">ASE Coverage</PageLink> and click its <strong className="text-foreground">name</strong> to open the AI-drafted TMR. Edit and double-check the request reason and target outcome, copy them, then click <strong className="text-foreground">Open TMR form</strong> and paste them into Elementum. Accounts without a draft show empty fields to fill in yourself. Opening the link does not submit the request.</p>
       </div>
-
-      <div className="flex flex-col gap-7">
-        <Step n={1} title="Set your scope">
-          Use the <strong className="text-foreground">Region</strong> and{" "}
-          <strong className="text-foreground">Quarter</strong> buttons at the top of the{" "}
-          <PageLink href="/">Overview</PageLink>. Your choice carries across every page, so set it
-          once.
-        </Step>
-
-        <Step n={2} title="Find your accounts">
-          <ul className="flex flex-col gap-1 list-disc list-inside">
-            <li>
-              <strong className="text-foreground">By name:</strong> open{" "}
-              <PageLink href="/plays">Suggested Plays</PageLink> and search for the account, AE, or
-              district.
-            </li>
-            <li>
-              <strong className="text-foreground">By book:</strong> open the{" "}
-              <PageLink href="/dm">DM</PageLink>, <PageLink href="/sem">SEM</PageLink>,{" "}
-              <PageLink href="/ae">AE</PageLink>, or <PageLink href="/se">SE</PageLink> rollup and
-              click your row to see just your uncovered Cap1s.
-            </li>
+      <div className="space-y-6 text-sm leading-relaxed text-muted-foreground">
+        <section>
+          <h2 className="mb-2 text-base font-semibold text-foreground">1. Choose your view</h2>
+          <ul className="list-disc space-y-2 pl-5">
+            <li><strong className="text-foreground">DM:</strong> <PageLink href="/dm">District Rollup</PageLink> → your district for its accounts.</li>
+            <li><strong className="text-foreground">SEM:</strong> <PageLink href="/sem">SEM Rollup</PageLink> → your name for your accounts.</li>
+            <li><strong className="text-foreground">AE:</strong> <PageLink href="/ae">AE Rollup</PageLink> → your name for accounts on opportunities you own.</li>
+            <li><strong className="text-foreground">SE:</strong> <PageLink href="/se">SE Rollup</PageLink> → your name for accounts where you are the lead SE.</li>
           </ul>
-        </Step>
-
-        <Step n={3} title="Check the suggested play">
-          Each account shows a pill — <strong className="text-foreground">ASE</strong>,{" "}
-          <strong className="text-foreground">Hybrid</strong>,{" "}
-          <strong className="text-foreground">Bluebird</strong>, or{" "}
-          <strong className="text-foreground">Webinar</strong>. If it shows a signal like{" "}
-          <strong className="text-foreground">SI involved</strong> or{" "}
-          <strong className="text-foreground">OD flip</strong>, someone else may already own
-          activation — double-check in Salesforce before reaching out. Not sure what a pill means?
-          See the <PageLink href="/dictionary">Dictionary</PageLink>.
-        </Step>
-
-        <Step n={4} title="Open a TMR">
-          On <PageLink href="/uncovered">ASE Coverage</PageLink>, find the account and click{" "}
-          <strong className="text-foreground">Open TMR ↗</strong> at the end of the row. Fill in the
-          account and a line or two of context — what the customer bought and anything you know about
-          their goals. Submit it, and we&apos;ll take it from there.
-        </Step>
-
-        <Step n={5} title="Trust your judgment">
-          The app is a starting point, not a rule. If an account clearly needs help, open a TMR even
-          if the app doesn&apos;t suggest one. If something looks wrong, tell us — the data comes from
-          Salesforce and can lag.
-        </Step>
+        </section>
+        <section>
+          <h2 className="mb-2 text-base font-semibold text-foreground">2. Review your accounts</h2>
+          <p>Use region, quarter, search, and column filters to narrow the list. <PageLink href="/uncovered">ASE Coverage</PageLink> includes both ASE assigned and No ASE. In AE/SE views, review both the regular account list and the group with potential involvement signals.</p>
+          <p className="mt-2">Check existing support before opening a new request. A partner or PS pill is context, not a reason to skip an account. See the <PageLink href="/dictionary">Dictionary</PageLink> for definitions.</p>
+        </section>
+        <section>
+          <h2 className="mb-2 text-base font-semibold text-foreground">3. See how many ASEs were added</h2>
+          <p>The <PageLink href="/">Overview</PageLink> shows the top 3 districts and SEMs by ASE TMRs added this quarter. There are no targets; use the Gap deals column on the rollups to see how many accounts still have No ASE.</p>
+        </section>
       </div>
-
-      <p className="mt-10 text-[12px] text-muted-foreground">
-        The app refreshes about every 10 minutes. Changes made in Salesforce can take a few hours
-        to show up here.
-      </p>
     </main>
   );
 }

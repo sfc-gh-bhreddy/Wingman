@@ -1,0 +1,77 @@
+import type { Deal } from "./types";
+
+/** Local experiment only. Observation dates retain the source's date grain. */
+export const ACTIVATION_HISTORY_SQL = `
+WITH roster AS (
+  SELECT ACCOUNT_ID, DISTRICT, SE_MANAGER
+  FROM ACCOUNT_ENGINEERING.PIPELINE.DT_AGG_WINGMATE
+  QUALIFY ROW_NUMBER() OVER (
+    PARTITION BY ACCOUNT_ID ORDER BY CLOSE_DATE DESC, OPPORTUNITY_ID, FQ_NUM
+  ) = 1
+), versions AS (
+  SELECT s.SALESFORCE_ACCOUNT_ID AS ACCOUNT_ID,
+    s.SALESFORCE_USE_CASE_ID AS USE_CASE_ID,
+    s.SALESFORCE_USE_CASE_NUMBER AS USE_CASE_NUMBER,
+    s.VALID_FROM,
+    COALESCE(s.SALESFORCE_USE_CASE_IMPLEMENTATION_COMMENTS ILIKE '%#activation%', FALSE) AS TAGGED,
+    LAG(COALESCE(s.SALESFORCE_USE_CASE_IMPLEMENTATION_COMMENTS ILIKE '%#activation%', FALSE))
+      OVER (PARTITION BY s.SALESFORCE_ACCOUNT_ID, s.SALESFORCE_USE_CASE_ID ORDER BY s.VALID_FROM) AS PREVIOUS_TAGGED,
+    LAG(s.VALID_FROM)
+      OVER (PARTITION BY s.SALESFORCE_ACCOUNT_ID, s.SALESFORCE_USE_CASE_ID ORDER BY s.VALID_FROM) AS PREVIOUS_OBSERVED_AT
+  FROM SNOW_CERTIFIED.SALESFORCE_USE_CASE.SNP_SALESFORCE_USE_CASE s
+  JOIN roster r ON r.ACCOUNT_ID = s.SALESFORCE_ACCOUNT_ID
+), history_accounts AS (
+  SELECT DISTINCT ACCOUNT_ID FROM versions
+), first_per_case AS (
+  SELECT * FROM versions WHERE TAGGED
+  QUALIFY ROW_NUMBER() OVER (PARTITION BY ACCOUNT_ID, USE_CASE_ID ORDER BY VALID_FROM) = 1
+), first_per_account AS (
+  SELECT *, BOOLOR_AGG(PREVIOUS_TAGGED IS NULL) OVER (PARTITION BY ACCOUNT_ID) AS HAS_BASELINE_TAG
+  FROM first_per_case
+  QUALIFY ROW_NUMBER() OVER (PARTITION BY ACCOUNT_ID ORDER BY VALID_FROM, USE_CASE_ID) = 1
+)
+SELECT r.ACCOUNT_ID, r.DISTRICT, r.SE_MANAGER,
+  TO_CHAR(f.VALID_FROM::DATE, 'YYYY-MM-DD') AS FIRST_ACTIVATION_OBSERVED_DATE,
+  TO_CHAR(f.PREVIOUS_OBSERVED_AT::DATE, 'YYYY-MM-DD') AS PREVIOUS_OBSERVED_DATE,
+  f.USE_CASE_NUMBER,
+  CASE WHEN f.HAS_BASELINE_TAG THEN 'BASELINE_TAGGED'
+    WHEN f.PREVIOUS_TAGGED = FALSE THEN 'OBSERVED_TRANSITION'
+    WHEN h.ACCOUNT_ID IS NULL THEN 'NO_HISTORY'
+    ELSE 'NO_OBSERVED_ACTIVATION' END AS HISTORY_STATUS,
+  TO_CHAR(CONVERT_TIMEZONE('UTC', CURRENT_TIMESTAMP()), 'YYYY-MM-DD"T"HH24:MI:SS.FF3"Z"') AS CHECKED_AT
+FROM roster r
+LEFT JOIN first_per_account f ON r.ACCOUNT_ID = f.ACCOUNT_ID
+LEFT JOIN history_accounts h ON r.ACCOUNT_ID = h.ACCOUNT_ID
+`;
+
+export interface ActivationHistoryRow {
+  ACCOUNT_ID: string;
+  DISTRICT: string | null;
+  SE_MANAGER: string | null;
+  FIRST_ACTIVATION_OBSERVED_DATE: string | null;
+  PREVIOUS_OBSERVED_DATE: string | null;
+  USE_CASE_NUMBER: string | null;
+  HISTORY_STATUS: "OBSERVED_TRANSITION" | "BASELINE_TAGGED" | "NO_HISTORY" | "NO_OBSERVED_ACTIVATION";
+  CHECKED_AT: string;
+}
+
+export function attachActivationHistory(deals: Deal[], rows: ActivationHistoryRow[]): Deal[] {
+  const byAccount = new Map(rows.map(row => [row.ACCOUNT_ID, row]));
+  return deals.map(deal => {
+    const row = byAccount.get(deal.accountId);
+    return {
+      ...deal,
+      aseLiveEvidence: undefined,
+      aseEvidenceCheckedAt: row?.CHECKED_AT ?? null,
+      activationHistory: row ? {
+        firstObservedDate: row.FIRST_ACTIVATION_OBSERVED_DATE,
+        previousObservedDate: row.PREVIOUS_OBSERVED_DATE,
+        useCaseNumber: row.USE_CASE_NUMBER,
+        status: row.HISTORY_STATUS,
+        district: row.DISTRICT,
+        sem: row.SE_MANAGER,
+        checkedAt: row.CHECKED_AT,
+      } : undefined,
+    };
+  });
+}

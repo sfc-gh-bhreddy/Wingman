@@ -6,7 +6,7 @@ const STATUS_TONE: Record<
   CoverageStatus,
   { bg: string; fg: string } | "neutral"
 > = {
-  Covered: STATUS_PALETTES.success,
+  "ASE assigned": STATUS_PALETTES.success,
   "No ASE": "neutral",
 };
 

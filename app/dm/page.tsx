@@ -2,28 +2,31 @@
 
 import { PageShell } from "@/components/page-shell";
 import { RollupTable } from "@/components/rollup-table";
-import { MethodologyNote } from "@/components/methodology-note";
 import { useCoverage } from "@/components/coverage-provider";
+import { useTmrAddedColumn } from "@/components/use-tmr-added-column";
 import { byDistrict } from "@/lib/aggregate";
+import type { Deal } from "@/lib/types";
+
+const districtOf = (d: Deal) => d.district ?? "(No district)";
 
 export default function DmRollupPage() {
   const { quarterDeals } = useCoverage();
-  const rows = byDistrict(quarterDeals);
+  const added = useTmrAddedColumn(districtOf);
 
   return (
     <PageShell
-      title="DM Rollup"
-      description="ASE coverage by District (the DM's book), ranked by coverage. Same coverage measures and gap ACV — drill into a district's uncovered Cap1s. Scoped to your region and quarter filters."
+      title="District Rollup"
+      description="ASE coverage and ASE TMRs added by district (DM). Click a district to see its accounts. Region and quarter filters apply."
       showQuarterFilter
     >
-      <div className="flex flex-col gap-4">
-        <RollupTable
-          dimensionLabel="District"
-          rows={rows}
-          hrefFor={(r) => `/uncovered?district=${encodeURIComponent(r.key)}`}
-        />
-        <MethodologyNote />
-      </div>
+      <RollupTable
+        dimensionLabel="District"
+        rows={byDistrict(quarterDeals)}
+        showWarning={false}
+        addedLabel={added.label}
+        addedFor={(r) => added.addedFor(r.key)}
+        hrefFor={(r) => `/uncovered?${new URLSearchParams({ district: r.key })}`}
+      />
     </PageShell>
   );
 }

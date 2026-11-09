@@ -63,8 +63,8 @@ Open [http://localhost:3000](http://localhost:3000).
 | ACV range | Suggested play | Pill |
 |-----------|---------------|------|
 | Above $65K | ASE 1:1 | ASE |
-| Above $25K through $65K | ASE + Bluebird + Webinar | Hybrid |
-| Up to $25K | Bluebird + Webinar | Bluebird / Webinar |
+| Above $10K through $65K | ASE + Bluebird + Webinar | Hybrid |
+| Up to $10K | Bluebird + Webinar | Bluebird / Webinar |
 
 ### Suppression signals (precedence order)
 
@@ -88,7 +88,7 @@ The app is pre-configured for Snowpark Container Services. The Snowflake connect
 
 ```bash
 cd ~/Desktop/Wingman
-docker build --platform linux/amd64 -t wingman:latest .
+docker build --platform linux/amd64 -t wingmate:latest .
 ```
 
 ### 2. Create Snowflake objects and push
@@ -108,8 +108,8 @@ Run Step 4 in `deploy.sql` to create the service. Step 6 gives you the public UR
 ### 4. Verify
 
 ```sql
-SELECT SYSTEM$GET_SERVICE_STATUS('TEMP.BHREDDY.WINGMAN_SERVICE');
-SHOW ENDPOINTS IN SERVICE TEMP.BHREDDY.WINGMAN_SERVICE;
+SELECT SYSTEM$GET_SERVICE_STATUS('ACCOUNT_ENGINEERING.WINGMAN.WINGMAN_SERVICE');
+SHOW ENDPOINTS IN SERVICE ACCOUNT_ENGINEERING.WINGMAN.WINGMAN_SERVICE;
 ```
 
 See `deploy.sql` for the full script including teardown commands.

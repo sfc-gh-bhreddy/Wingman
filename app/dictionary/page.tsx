@@ -1,207 +1,58 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { MethodologyNote } from "@/components/methodology-note";
 
 export const metadata: Metadata = { title: "Dictionary" };
 
-function Pill({ label, bg, fg }: { label: string; bg: string; fg: string }) {
-  return (
-    <span
-      className="rounded-full px-2.5 py-0.5 text-[11px] font-medium whitespace-nowrap"
-      style={{ background: bg, color: fg }}
-    >
-      {label}
-    </span>
-  );
-}
-
-function Section({ title, children }: { title: string; children: React.ReactNode }) {
-  return (
-    <div className="flex flex-col gap-3">
-      <h2 className="text-[15px] font-semibold tracking-tight">{title}</h2>
-      {children}
-    </div>
-  );
-}
-
 export default function DictionaryPage() {
   return (
-    <main className="w-full max-w-2xl mx-auto py-10 px-8">
-      <h1 className="text-2xl font-bold tracking-tight mb-1">Dictionary</h1>
-      <p className="text-sm text-muted-foreground mb-8">
-        What every play, pill, and signal in this app means.
-      </p>
-
-      {/* Intent */}
-      <div
-        className="rounded-xl border px-5 py-4 mb-8 text-sm leading-relaxed"
-        style={{ borderColor: "var(--border)", background: "var(--card)" }}
-      >
-        <p>
-          The suggestions on this app are <strong>starting points</strong>, not instructions.
-          They surface uncovered Cap1 accounts and recommend a next action based on deal size,
-          consumption stage, and partner signals. <strong>If you see a clear need to assign an
-          ASE, go ahead — don't wait for the app to tell you.</strong> Use your own judgment
-          and knowledge of the account first.
-        </p>
-      </div>
-
-      <div className="flex flex-col gap-8">
-
-        {/* Suggested plays */}
-        <Section title="Suggested plays">
-          <div className="flex flex-col gap-5 text-sm">
-            {/* ASE */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Pill label="ASE" bg="#dbeafe" fg="#1e40af" />
-                <p className="font-medium">Assign an ASC Engineer (1:1)</p>
-              </div>
-              <p className="text-muted-foreground">
-                Deal ACV is above $65K. Primarily consider 1:1 ASE support — open a TMR if needed.
-              </p>
-            </div>
-
-            {/* Hybrid */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Pill label="Hybrid" bg="#e0e7ff" fg="#3730a3" />
-                <p className="font-medium">ASE + Bluebird + Webinar</p>
-              </div>
-              <p className="text-muted-foreground">
-                Deal ACV is above $25K through $65K. Consider a hybrid motion: Bluebird and a webinar alongside 1:1 ASE support when the account needs it.
-              </p>
-            </div>
-
-            {/* Bluebird */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Pill label="Bluebird" bg="#dcfce7" fg="#166534" />
-                <p className="font-medium">BOB self-service program</p>
-                <a
-                  href="https://docs.google.com/document/d/10q5Mjmgw4NmnU2kEu7nO6Zx7Z9v23uY5EESQNj4aRYY/edit?tab=t.0"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[12px] underline decoration-1 underline-offset-2 hover:opacity-70"
-                  style={{ color: "#166534" }}
-                >
-                  docs ↗
-                </a>
-              </div>
-              <p className="text-muted-foreground mb-2">
-                Deal ACV is up to $25K — primarily Bluebird, with a webinar for enablement. Enroll the account in the Bluebird Book of Business activation program. Consider the following fit signals as well:
-              </p>
-              <ul className="text-muted-foreground flex flex-col gap-0.5 list-disc list-inside">
-                <li><strong className="text-foreground">ACV up to $25K</strong> — use your discretion for accounts slightly above this; happy to discuss any time.</li>
-                <li><strong className="text-foreground">Signed recently or stalled</strong> — closed within the past 90 days, or signed months ago and still haven’t loaded any data.</li>
-                <li><strong className="text-foreground">Small or non-technical team</strong> — 1–3 people trying to get started, not a large engineering org.</li>
-                <li><strong className="text-foreground">Expressed interest in getting started</strong> — “what do I do first?” or “how do I get started?” are perfect indicators. These are the accounts Bluebird is built for.</li>
-                <li><strong className="text-foreground">Less than 5% of contract capacity consumed</strong> — barely touched their contract and need a nudge to get going.</li>
-              </ul>
-            </div>
-
-            {/* Webinar */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Pill label="Webinar" bg="#fef9c3" fg="#854d0e" />
-                <p className="font-medium">Activation Webinar Series</p>
-                <a
-                  href="https://www.snowflake.com/en/webinars/?tags=region%2Famericas"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-[12px] underline decoration-1 underline-offset-2 hover:opacity-70"
-                  style={{ color: "#854d0e" }}
-                >
-                  View the webinar series ↗
-                </a>
-              </div>
-              <p className="text-muted-foreground text-[12px] leading-relaxed">
-                A 6-topic simulive series for new customers and low-adoption accounts. A facilitator presents prepared content followed by live Q&amp;A. Topics repeat every 6 weeks — there is always a session coming up soon (Securing Your Snowflake Account, Warehouse Design &amp; Cost Control, Getting Data into Snowflake, etc.).
-              </p>
-            </div>
-
-            {/* SI involved */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Pill label="SI involved" bg="#f3e8ff" fg="#6b21a8" />
-                <p className="font-medium">Systems integrator or partner detected</p>
-              </div>
-              <p className="text-muted-foreground">
-                A partner appears to be handling implementation on this account, so no ASE action is suggested. <strong>This is a signal, not a guarantee.</strong> It is detected from open use-case partner attachment or an approved Salesforce deal registration ("SPN: Deal Registrations" on the opportunity). Always verify in Salesforce before skipping outreach — the partner data is not always current.
-              </p>
-            </div>
-
-            {/* Partner involved */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Pill label="Partner involved" bg="#ffedd5" fg="#9a3412" />
-                <p className="font-medium">A partner is on any use case</p>
-              </div>
-              <p className="text-muted-foreground">
-                At least one use case on the account (open or closed) lists a partner, so no play is suggested. Broader than "SI involved" — any single partner touch flags the account. <strong>Verify before skipping outreach.</strong>
-              </p>
-            </div>
-
-            {/* PS involved */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Pill label="PS involved" bg="#e0f2fe" fg="#075985" />
-                <p className="font-medium">Professional Services is engaged</p>
-              </div>
-              <p className="text-muted-foreground">
-                Any use case on the account shows PS engagement (Advisory, Proposing, Implementation, or Support). Professional Services owns the activation motion, so no play is suggested.
-              </p>
-            </div>
-
-            {/* Partner acct */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Pill label="Partner acct" bg="#fae8ff" fg="#86198f" />
-                <p className="font-medium">The account is itself a partner</p>
-              </div>
-              <p className="text-muted-foreground">
-                The account's Salesforce type is Partner, or it carries a DCP or DCS partner flag. Partner accounts are excluded from activation plays.
-              </p>
-            </div>
-
-            {/* OD flip */}
-            <div>
-              <div className="flex items-center gap-2 mb-1">
-                <Pill label="OD flip" bg="#fce7f3" fg="#9d174d" />
-                <p className="font-medium">On Demand and Capacity both closed won</p>
-              </div>
-              <p className="text-muted-foreground">
-                The account has both a Closed Won On Demand opportunity and a Closed Won Capacity opportunity — it is already consuming under a different motion, so no activation play is suggested.
-              </p>
-            </div>
-          </div>
-        </Section>
-
-        {/* Coverage signals */}
-        <Section title="What counts as covered">
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            An account is marked <strong>Covered</strong> if <em>any one</em> of the following
-            signals exists in Salesforce or Elementum:
-          </p>
-          <ul className="text-sm text-muted-foreground flex flex-col gap-0.5 list-disc list-inside">
-            <li>A TMR (Team Member Request) assignment in Elementum</li>
-            <li>An activation tag on the account</li>
-            <li>An ASE assigned to the Salesforce use-case team</li>
-            <li>An ASE role on the Salesforce account team</li>
+    <main className="mx-auto w-full max-w-3xl px-6 py-10">
+      <h1 className="mb-2 text-2xl font-bold tracking-tight">Dictionary</h1>
+      <p className="mb-7 text-sm text-muted-foreground">What the numbers mean and where to find your book.</p>
+      <div className="space-y-7 text-sm leading-relaxed text-muted-foreground">
+        <section>
+          <h2 className="mb-2 text-base font-semibold text-foreground">ASE TMRs added</h2>
+          <p>The number of accounts that got their <strong className="text-foreground">first ASE TMR</strong> in a fiscal quarter. Each account counts once, in the quarter its first ASE TMR was opened. There is no target; this shows how many ASEs were added and where there is still room to add more.</p>
+          <p className="mt-2">Fiscal quarters: Q1 Feb to Apr, Q2 May to Jul, Q3 Aug to Oct, Q4 Nov to Jan.</p>
+        </section>
+        <section>
+          <h2 className="mb-2 text-base font-semibold text-foreground">ASE capacity</h2>
+          <p><strong className="text-foreground">Open capacity = (number of ASEs x 15) - active accounts.</strong> This is how many new TMRs the ASE team can take right now. Each ASE targets 15 active accounts. An account counts as active when an ASE has it marked Active in their book of business; an account shared by two ASEs counts once.</p>
+          <p className="mt-2">Capacity is team-wide, so region and quarter filters do not change it.</p>
+        </section>
+        <section aria-label="Triangle meaning">
+          <h2 className="mb-2 text-base font-semibold text-foreground">What the red triangle means</h2>
+          <MethodologyNote />
+          <p className="mt-2">The red triangle appears on the AE and SE rollups only.</p>
+        </section>
+        <section>
+          <h2 className="mb-2 text-base font-semibold text-foreground">Where to find your book</h2>
+          <ul className="list-disc space-y-2 pl-5">
+            <li><strong className="text-foreground">DM:</strong> <Link className="text-primary hover:underline" href="/dm">District Rollup</Link>, then select your district.</li>
+            <li><strong className="text-foreground">SEM:</strong> <Link className="text-primary hover:underline" href="/sem">SEM Rollup</Link>, then select your name.</li>
+            <li><strong className="text-foreground">AE / SE:</strong> open your rollup and select your name. AE accounts are grouped by opportunity owner; SE accounts by lead SE.</li>
           </ul>
-          <p className="text-sm text-muted-foreground">
-            Only one signal is needed. The coverage date shown is the earliest date any signal
-            appeared — before or on close date means the account was covered at deal close.
-          </p>
-        </Section>
-
-        {/* Data freshness */}
-        <Section title="Data freshness">
-          <p className="text-sm text-muted-foreground leading-relaxed">
-            Data is cached on the server for 10 minutes. To force a refresh, do a hard reload
-            (<kbd className="rounded border px-1.5 py-0.5 text-[11px] font-mono" style={{ borderColor: "var(--border)" }}>⌘ Shift R</kbd>).
-            Coverage signals and consumption figures update as Salesforce and A360 sync — typically within a few hours of a real change.
-          </p>
-        </Section>
-
+        </section>
+        <section>
+          <h2 className="mb-2 text-base font-semibold text-foreground">Reading the numbers</h2>
+          <ul className="list-disc space-y-2 pl-5">
+            <li><strong className="text-foreground">Cap1 deals / ACV:</strong> first-capacity deals and their contract value. Deal totals count unique opportunities.</li>
+            <li><strong className="text-foreground">ASE coverage:</strong> deals with ASE evidence divided by all deals in scope. The adjusted Overview rate excludes SI-involved deals only; OD flips are included everywhere.</li>
+            <li><strong className="text-foreground">Gap deals:</strong> deals with No ASE. These are the accounts to look at for adding an ASE.</li>
+            <li><strong className="text-foreground">Top 3 districts and SEMs:</strong> on the Overview, the districts and SEMs with the most ASE TMRs added in the current quarter.</li>
+          </ul>
+        </section>
+        <section>
+          <h2 className="mb-2 text-base font-semibold text-foreground">Additional information</h2>
+          <ul className="list-disc space-y-2 pl-5">
+            <li><strong className="text-foreground">Refresh timing:</strong> app data is cached for 10 minutes; source updates can take longer to appear.</li>
+            <li><strong className="text-foreground">Credit:</strong> uses current district and SEM assignments, not ownership when the TMR was opened.</li>
+            <li><strong className="text-foreground">Scope:</strong> counts accounts in Wingman&apos;s FY27 first-capacity roster and selected region.</li>
+            <li><strong className="text-foreground">Quarter filter:</strong> on the rollups, the TMRs added column follows the selected quarter. With All selected it shows the current quarter.</li>
+            <li><strong className="text-foreground">A TMR is missing:</strong> check the TMR was submitted in Elementum with an ASE specialist type, then allow for refresh. Opening the Open TMR link alone does not submit a request.</li>
+            <li><strong className="text-foreground">TMR drafts:</strong> on ASE Coverage, click an account name to see an AI-drafted request reason and target outcome built from recent calls. A green dot means a draft is ready. Drafts can be wrong or incomplete, so edit and double-check every field before you copy it into the TMR form. Edits are saved in your browser only.</li>
+          </ul>
+        </section>
       </div>
     </main>
   );
