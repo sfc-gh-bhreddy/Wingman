@@ -49,9 +49,6 @@ export default function OverviewPage() {
           sub={`${eligible.covered} of ${eligible.deals} deals; ${excluded} excluded for SI involved`}
         />
       </div>
-      <p className="mt-2 text-xs text-muted-foreground">
-        ASE coverage (excluding SI) uses distinct Cap1 deals and the selected region and quarter. It excludes deals flagged SI involved from both the covered count and the total. OD flips are included. SI involvement is a review cue, not proof an ASE is unnecessary.
-      </p>
 
       <AseCapacityCard />
       <TopAseAdded />
