@@ -97,8 +97,8 @@ Open `deploy.sql` and run Steps 1-2 to create the image repository. Copy the `re
 
 ```bash
 snow spcs image-registry login --connection "sfcogsops-snowhouse_aws_us_west_2"
-docker tag wingman:latest <repository_url>/wingman:latest
-docker push <repository_url>/wingman:latest
+docker tag wingmate:latest <repository_url>/wingmate:latest
+docker push <repository_url>/wingmate:latest
 ```
 
 ### 3. Create the service
