@@ -219,7 +219,7 @@ function UncoveredInner() {
           <section className="flex flex-col gap-3 border-t border-border pt-5" aria-label="Accounts with potential involvement">
             <h2 className="text-sm font-semibold">Accounts with potential involvement ({reviewAccountCount})</h2>
             <p className="text-xs text-muted-foreground">
-              These accounts have potential SI, partner, PS, or partner-account signals, or were marked by the AE/SE. Signals can overlap and do not confirm that the account is fully supported. Review each account and add an ASE if needed. Use <strong>Move to No ASE</strong> to send an account back to the list above.
+              A partner, SI, or PS may be involved, or the AE/SE flagged it. Add an ASE if they still need help, or use <strong>Move to No ASE</strong>.
             </p>
             {signalCounts.length > 0 ? (
               <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted-foreground">
