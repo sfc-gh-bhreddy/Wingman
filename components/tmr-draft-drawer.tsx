@@ -85,7 +85,7 @@ export function TmrDraftDrawer({ deal, onClose }: { deal: Deal; onClose: () => v
                 {formatUsd(deal.cap1Acv)} Cap1 · {regionLabel(deal.region)} · {deal.district ?? "No district"} · closed {formatDate(deal.closeDate)}
               </p>
               <p className="text-xs text-muted-foreground">
-                AE {deal.owner ?? "—"} · Lead SE {deal.leadSe ?? "—"}
+                AE {deal.owner ?? "—"} · SE {deal.leadSe ?? "—"}
               </p>
             </div>
             <button type="button" onClick={onClose} aria-label="Close" className="rounded px-2 py-1 text-sm hover:bg-muted">

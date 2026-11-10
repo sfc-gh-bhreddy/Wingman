@@ -13,13 +13,13 @@ export default function SeRollupPage() {
   return (
     <PageShell
       title="SE Rollup"
-      description="ASE coverage by Lead SE (from D_SALESFORCE_ACCOUNT_CUSTOMERS), ranked by coverage. Drill into an SE's uncovered Cap1s. Scoped to your region and quarter filters."
+      description="ASE coverage by SE, ranked by coverage. Drill into an SE's uncovered Cap1s. Scoped to your region and quarter filters."
       showQuarterFilter
     >
       <div className="flex flex-col gap-4">
         <RollupTable
           warningTone="red"
-          dimensionLabel="Lead SE"
+          dimensionLabel="SE"
           rows={rows}
           hrefFor={(r) => `/uncovered?se=${encodeURIComponent(r.key)}`}
         />

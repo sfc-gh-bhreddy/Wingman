@@ -108,7 +108,7 @@ export function byRegion(
 }
 
 const NO_DISTRICT = "(No district)";
-const NO_SEM = "(No SE manager)";
+const NO_SEM = "(No SEM)";
 const NO_SE = "(No SE)";
 const NO_OWNER = "(No owner)";
 

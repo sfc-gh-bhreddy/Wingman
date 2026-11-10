@@ -50,7 +50,6 @@ export default function OverviewPage() {
         />
       </div>
 
-      <AseCapacityCard />
       <TopAseAdded />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
@@ -80,6 +79,8 @@ export default function OverviewPage() {
           </Callout>
         ) : null}
       </div>
+
+      <AseCapacityCard />
     </PageShell>
   );
 }

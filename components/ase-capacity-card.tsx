@@ -8,16 +8,6 @@ interface CapacityData {
   teamActive: number;
 }
 
-function Stat({ label, value, hint }: { label: string; value: number; hint: string }) {
-  return (
-    <div className="flex flex-col rounded-lg border border-border px-6 py-5">
-      <span className="text-3xl font-semibold tabular-nums">{value}</span>
-      <span className="text-sm font-medium">{label}</span>
-      <span className="text-xs text-muted-foreground">{hint}</span>
-    </div>
-  );
-}
-
 /** Team Capacity and Active accounts, same numbers as the SnowCats BoB dashboard. Not affected by filters. */
 export function AseCapacityCard() {
   const [data, setData] = useState<CapacityData | null>(null);
@@ -36,21 +26,28 @@ export function AseCapacityCard() {
   }, []);
 
   return (
-    <section aria-label="ASE capacity" className="mt-5 rounded-xl border border-border bg-card p-4">
-      <h2 className="flex items-center gap-2 text-base font-semibold">
-        <Gauge className="size-4 text-primary" aria-hidden="true" />
-        ASE capacity
-      </h2>
-      {error ? (
-        <p role="alert" className="mt-2 text-sm text-destructive">{error}</p>
-      ) : !data ? (
-        <p role="status" className="mt-2 text-sm text-muted-foreground">Loading...</p>
-      ) : (
-        <div className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <Stat label="Team Capacity" value={data.teamCapacity} hint="new accounts the team can take" />
-          <Stat label="Active accounts" value={data.teamActive} hint="unique accounts across the ASE team" />
-        </div>
-      )}
+    <section
+      aria-label="Estimated team capacity"
+      className="mt-8 flex flex-col gap-4 rounded-xl border border-primary/15 bg-primary/5 px-5 py-4 sm:flex-row sm:items-center"
+    >
+      <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10">
+        <Gauge className="size-5 text-primary" aria-hidden="true" />
+      </div>
+      <div className="flex-1">
+        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">Estimated team capacity:</p>
+        {error ? (
+          <p role="alert" className="text-sm text-destructive">{error}</p>
+        ) : !data ? (
+          <p role="status" className="text-sm text-muted-foreground">Loading...</p>
+        ) : (
+          <p className="text-sm">
+            <span className="font-semibold tabular-nums">~{data.teamCapacity}</span> new accounts
+            <span className="mx-2 text-muted-foreground">·</span>
+            <span className="font-semibold tabular-nums">{data.teamActive}</span> active today
+          </p>
+        )}
+        <p className="mt-1 text-xs text-muted-foreground">Regardless of capacity, submit a TMR for every account that needs help.</p>
+      </div>
     </section>
   );
 }

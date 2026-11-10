@@ -48,8 +48,8 @@ function UncoveredInner() {
     deals = deals.filter((d) => (d.district ?? "(No district)") === drillDistrict);
     drillLabel = `District: ${drillDistrict}`;
   } else if (drillSem) {
-    deals = deals.filter((d) => (d.seManager ?? "(No SE manager)") === drillSem);
-    drillLabel = `SE Manager: ${drillSem}`;
+    deals = deals.filter((d) => (d.seManager ?? "(No SEM)") === drillSem);
+    drillLabel = `SEM: ${drillSem}`;
   } else if (drillSe) {
     deals = deals.filter((d) => (d.leadSe ?? "(No SE)") === drillSe);
     drillLabel = `SE: ${drillSe}`;
@@ -156,10 +156,14 @@ function UncoveredInner() {
       }
     : undefined;
   const s = summarize(filtered);
-  // AE Rollup drill: show the account's SE instead of the AE (already the filter) and no Open TMR link.
+  // Person drills (AE / SE / SEM): hide the person being drilled, show the other two roles, no Quarter column.
   const tableColumns = drillOwner
-    ? { district: true, seManager: true, leadSe: true }
-    : { district: true, seManager: true, owner: true };
+    ? { district: true, seManager: true, leadSe: true, quarter: false }
+    : drillSe
+      ? { district: true, seManager: true, owner: true, quarter: false }
+      : drillSem
+        ? { district: true, owner: true, leadSe: true, quarter: false }
+        : { district: true, seManager: true, owner: true };
   const hideTmrLink = Boolean(drillDistrict || drillOwner);
 
   return (

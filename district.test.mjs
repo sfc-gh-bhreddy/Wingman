@@ -22,8 +22,8 @@ test('district list and SEM rollup reconcile without dropping unassigned mapping
   assert.equal(byDistrict(rows).reduce((sum, row) => sum + row.deals, 0), rows.length);
   const east = districtScope(rows, 'East');
   assert.equal(bySeManager(east).reduce((sum, row) => sum + row.deals, 0), east.length);
-  assert.deepEqual(districtScope(rows, 'East', '(No SE manager)').map(d => d.opportunityId), ['four']);
-  assert.deepEqual(districtScope(rows, '(No district)', '(No SE manager)').map(d => d.opportunityId), ['five']);
+  assert.deepEqual(districtScope(rows, 'East', '(No SEM)').map(d => d.opportunityId), ['four']);
+  assert.deepEqual(districtScope(rows, '(No district)', '(No SEM)').map(d => d.opportunityId), ['five']);
 });
 test('invalid district or SEM produces an empty result, never a wider scope', () => {
   assert.equal(districtScope(rows, 'Missing').length, 0);

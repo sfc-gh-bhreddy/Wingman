@@ -62,3 +62,24 @@ export function quartersSoFar(now: Date): FiscalQuarter[] {
   const cur = currentFiscalQuarter(now);
   return Array.from({ length: cur.fq }, (_, i) => ({ fy: cur.fy, fq: i + 1 }));
 }
+
+/**
+ * The accounts behind a tmrAddedBy count: unique accounts whose first ASE TMR
+ * falls in the quarter and whose key matches. Newest TMR first.
+ */
+export function tmrAddedAccounts(
+  deals: Deal[],
+  tmrDates: Record<string, string>,
+  quarter: FiscalQuarter,
+  keyOf: (deal: Deal) => string,
+  key: string,
+): { deal: Deal; tmrDate: string }[] {
+  const rows: { deal: Deal; tmrDate: string }[] = [];
+  for (const deal of accounts(deals)) {
+    const date = tmrDates[deal.accountId];
+    const q = date ? fiscalQuarterOf(date) : null;
+    if (!q || q.fy !== quarter.fy || q.fq !== quarter.fq || keyOf(deal) !== key) continue;
+    rows.push({ deal, tmrDate: date });
+  }
+  return rows.sort((a, b) => b.tmrDate.localeCompare(a.tmrDate));
+}

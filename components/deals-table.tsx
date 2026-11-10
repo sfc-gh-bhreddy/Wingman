@@ -14,8 +14,8 @@ function exportSelectedCsv(deals: Deal[]) {
     { h: "Account", g: (d: Deal) => d.accountName ?? "" },
     { h: "Region", g: (d: Deal) => regionLabel(d.region) },
     { h: "District", g: (d: Deal) => d.district ?? "" },
-    { h: "SE Manager", g: (d: Deal) => d.seManager ?? "" },
-    { h: "Owner (AE)", g: (d: Deal) => d.owner ?? "" },
+    { h: "SEM", g: (d: Deal) => d.seManager ?? "" },
+    { h: "AE", g: (d: Deal) => d.owner ?? "" },
     { h: "SE", g: (d: Deal) => d.leadSe ?? "" },
     { h: "Quarter", g: (d: Deal) => d.fiscalPeriod },
     { h: "Close Date", g: (d: Deal) => d.closeDate ?? "" },
@@ -65,7 +65,7 @@ function getFilterValue(deal: Deal, key: string): string {
     case "account": return deal.accountName ?? "(No name)";
     case "region": return regionLabel(deal.region);
     case "district": return deal.district ?? "(No district)";
-    case "seManager": return deal.seManager ?? "(No SE manager)";
+    case "seManager": return deal.seManager ?? "(No SEM)";
     case "owner": return deal.owner ?? "(No owner)";
     case "leadSe": return deal.leadSe ?? "No SE assigned";
     case "quarter": return deal.fiscalQuarter;
@@ -310,7 +310,7 @@ export function DealsTable({
   renderStatus,
 }: {
   deals: Deal[];
-  showColumns?: { district?: boolean; seManager?: boolean; owner?: boolean; leadSe?: boolean; };
+  showColumns?: { district?: boolean; seManager?: boolean; owner?: boolean; leadSe?: boolean; quarter?: boolean; };
   signalLabels?: (deal: Deal) => string[];
   /** Hide the per-row Open TMR column (District Rollup drilldown). */
   hideTmrLink?: boolean;
@@ -482,13 +482,13 @@ export function DealsTable({
                 <FilterableSortHeader label="District" sortKey="district" filterable {...sharedFilterProps} />
               ) : null}
               {showColumns.seManager ? (
-                <FilterableSortHeader label="SE Manager" sortKey="seManager" filterable {...sharedFilterProps} />
+                <FilterableSortHeader label="SEM" sortKey="seManager" filterable {...sharedFilterProps} />
               ) : null}
               {showColumns.owner ? (
-                <FilterableSortHeader label="Owner (AE)" sortKey="owner" filterable {...sharedFilterProps} />
+                <FilterableSortHeader label="AE" sortKey="owner" filterable {...sharedFilterProps} />
               ) : null}
               {showColumns.leadSe ? <FilterableSortHeader label="SE" sortKey="leadSe" filterable {...sharedFilterProps} /> : null}
-              <FilterableSortHeader label="Quarter" sortKey="quarter" filterable {...sharedFilterProps} />
+              {showColumns.quarter === false ? null : <FilterableSortHeader label="Quarter" sortKey="quarter" filterable {...sharedFilterProps} />}
               <FilterableSortHeader label="Close date" sortKey="closeDate" {...sharedFilterProps} />
               <FilterableSortHeader label="Cap1 ACV" sortKey="acv" className="text-right" {...sharedFilterProps} />
               <FilterableSortHeader label="TTM consumption" sortKey="ytd" className="text-right" {...sharedFilterProps} />
@@ -536,18 +536,20 @@ export function DealsTable({
                   <td className="px-3 py-2.5">{dash(d.district)}</td>
                 ) : null}
                 {showColumns.seManager ? (
-                  <td className="px-3 py-2.5">{d.seManager ?? "(No SE manager)"}</td>
+                  <td className="px-3 py-2.5">{d.seManager ?? "(No SEM)"}</td>
                 ) : null}
                 {showColumns.owner ? (
                   <td className="px-3 py-2.5">{dash(d.owner)}</td>
                 ) : null}
                 {showColumns.leadSe ? <td className="px-3 py-2.5">{d.leadSe ?? <span className="text-muted-foreground">No SE assigned</span>}</td> : null}
-                <td className="px-3 py-2.5 whitespace-nowrap">
-                  {d.fiscalPeriod}
-                  {d.isOpenQuarter ? (
-                    <span className="ml-1 text-[10px] text-muted-foreground">(open)</span>
-                  ) : null}
-                </td>
+                {showColumns.quarter === false ? null : (
+                  <td className="px-3 py-2.5 whitespace-nowrap">
+                    {d.fiscalPeriod}
+                    {d.isOpenQuarter ? (
+                      <span className="ml-1 text-[10px] text-muted-foreground">(open)</span>
+                    ) : null}
+                  </td>
+                )}
                 <td className="px-3 py-2.5 whitespace-nowrap">{formatDate(d.closeDate)}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{formatUsd(d.cap1Acv)}</td>
                 <td className="px-3 py-2.5 text-right tabular-nums">{formatUsd(d.ytdConsumption)}</td>
@@ -583,7 +585,7 @@ export function DealsTable({
             {sorted.length === 0 ? (
               <tr>
                 <td
-                  colSpan={(hideTmrLink ? 8 : 9) + Number(Boolean(showColumns.district)) + Number(Boolean(showColumns.seManager)) + Number(Boolean(showColumns.owner)) + Number(Boolean(showColumns.leadSe)) + Number(Boolean(signalLabels))}
+                  colSpan={(hideTmrLink ? 8 : 9) - Number(showColumns.quarter === false) + Number(Boolean(showColumns.district)) + Number(Boolean(showColumns.seManager)) + Number(Boolean(showColumns.owner)) + Number(Boolean(showColumns.leadSe)) + Number(Boolean(signalLabels))}
                   className="px-4 py-8 text-center text-sm text-muted-foreground"
                 >
                   No deals match the current filter.

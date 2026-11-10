@@ -19,7 +19,7 @@ test('local leaderboard uses observed account additions, excludes baseline histo
  assert.equal(observedActivationLeaderboard(deals,now).status,'unavailable');
 });
 test('district card shows unique named SEMs without changing account credit',()=>{
- const deals=[deal('a'),deal('b',{seManager:' SEM B '}),deal('c',{seManager:'SEM A'}),deal('d',{seManager:null}),deal('e',{seManager:'(No SE manager)'}),deal('f',{seManager:'  '}),deal('g',{district:'West',seManager:'SEM West'})];
+ const deals=[deal('a'),deal('b',{seManager:' SEM B '}),deal('c',{seManager:'SEM A'}),deal('d',{seManager:null}),deal('e',{seManager:'(No SEM)'}),deal('f',{seManager:'  '}),deal('g',{district:'West',seManager:'SEM West'})];
  assert.deepEqual(districtSemNames(deals,'East'),['SEM A','SEM B']);
  assert.deepEqual(districtSemNames(deals,'West'),['SEM West']);
  assert.deepEqual(districtSemNames(deals,'Empty'),[]);

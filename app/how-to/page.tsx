@@ -23,7 +23,7 @@ export default function HowToPage() {
             <li><strong className="text-foreground">DM:</strong> <PageLink href="/dm">District Rollup</PageLink> → your district for its accounts.</li>
             <li><strong className="text-foreground">SEM:</strong> <PageLink href="/sem">SEM Rollup</PageLink> → your name for your accounts.</li>
             <li><strong className="text-foreground">AE:</strong> <PageLink href="/ae">AE Rollup</PageLink> → your name for accounts on opportunities you own.</li>
-            <li><strong className="text-foreground">SE:</strong> <PageLink href="/se">SE Rollup</PageLink> → your name for accounts where you are the lead SE.</li>
+            <li><strong className="text-foreground">SE:</strong> <PageLink href="/se">SE Rollup</PageLink> → your name for accounts where you are the SE.</li>
           </ul>
         </section>
         <section>

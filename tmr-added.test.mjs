@@ -28,8 +28,8 @@ test('counts each account once by first ASE TMR in the quarter', () => {
   const q3 = { fy: 2027, fq: 3 };
   const byDistrict = tmrAddedBy(deals, dates, q3, d => d.district ?? '(No district)');
   assert.deepEqual(Object.fromEntries(byDistrict), { NY: 2, TOLA: 1, '(No district)': 1 });
-  const bySem = tmrAddedBy(deals, dates, q3, d => d.seManager ?? '(No SE manager)');
-  assert.deepEqual(topAdded(bySem), [{ key: '(No SE manager)', added: 1 }, { key: 'Andy', added: 1 }, { key: 'Bo', added: 1 }]);
+  const bySem = tmrAddedBy(deals, dates, q3, d => d.seManager ?? '(No SEM)');
+  assert.deepEqual(topAdded(bySem), [{ key: '(No SEM)', added: 1 }, { key: 'Andy', added: 1 }, { key: 'Bo', added: 1 }]);
 });
 
 test('top list drops zeros, sorts by count then name, caps at 3', () => {
@@ -88,7 +88,7 @@ test('ASE capacity = ASEs x 15 - active, negative means over capacity', async ()
   assert.equal(aseCapacity(0, 0).open, 0);
 });
 
-test('capacity query is read-only from bob_current; card shows Team Capacity then Active accounts', async () => {
+test('capacity query is read-only from bob_current; estimated capacity note sits at the bottom of Overview', async () => {
   const [data, overview, card] = await Promise.all(['lib/data.ts', 'app/page.tsx', 'components/ase-capacity-card.tsx'].map(p => readFile(new URL(p, import.meta.url), 'utf8')));
   const sql = data.split('ASE_CAPACITY_SQL = `')[1].split('`;')[0];
   assert.match(sql, /ACCOUNT_ENGINEERING\.SNOWCATS\.BOB_CURRENT/);
@@ -98,14 +98,18 @@ test('capacity query is read-only from bob_current; card shows Team Capacity the
   assert.doesNotMatch(sql, /\b(INSERT|UPDATE|DELETE|MERGE|CREATE)\b/);
   assert.match(data, /filter\(\(o\) => !o\.frozen\)/);
   assert.match(overview, /<AseCapacityCard \/>/);
-  assert.ok(card.indexOf('label="Team Capacity"') < card.indexOf('label="Active accounts"'));
+  assert.ok(overview.indexOf('<AseCapacityCard />') > overview.indexOf('<TopAseAdded />'));
+  assert.match(card, /Estimated team capacity:/);
+  assert.match(card, /Regardless of capacity/);
 });
 
 test('District and AE Rollup drilldowns hide the Open TMR column; AE drill shows SE', async () => {
   const [page, table] = await Promise.all(['app/uncovered/page.tsx', 'components/deals-table.tsx'].map(p => readFile(new URL(p, import.meta.url), 'utf8')));
   assert.match(page, /const hideTmrLink = Boolean\(drillDistrict \|\| drillOwner\)/);
   assert.equal((page.match(/hideTmrLink=\{hideTmrLink\}/g) ?? []).length, 2);
-  assert.match(page, /drillOwner\s*\? \{ district: true, seManager: true, leadSe: true \}/);
+  assert.match(page, /drillOwner\s*\? \{ district: true, seManager: true, leadSe: true, quarter: false \}/);
+  assert.match(page, /drillSe\s*\? \{ district: true, seManager: true, owner: true, quarter: false \}/);
+  assert.match(page, /drillSem\s*\? \{ district: true, owner: true, leadSe: true, quarter: false \}/);
   assert.match(table, /No SE assigned/);
   assert.match(table, /hideTmrLink \? null : \(/);
 });

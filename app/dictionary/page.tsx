@@ -30,7 +30,7 @@ export default function DictionaryPage() {
           <ul className="list-disc space-y-2 pl-5">
             <li><strong className="text-foreground">DM:</strong> <Link className="text-primary hover:underline" href="/dm">District Rollup</Link>, then select your district.</li>
             <li><strong className="text-foreground">SEM:</strong> <Link className="text-primary hover:underline" href="/sem">SEM Rollup</Link>, then select your name.</li>
-            <li><strong className="text-foreground">AE / SE:</strong> open your rollup and select your name. AE accounts are grouped by opportunity owner; SE accounts by lead SE.</li>
+            <li><strong className="text-foreground">AE / SE:</strong> open your rollup and select your name. AE accounts are grouped by opportunity owner; SE accounts by SE.</li>
           </ul>
         </section>
         <section>

@@ -7,7 +7,7 @@ import { useTmrDates } from "@/components/use-tmr-dates";
 import { currentFiscalQuarter, quarterLabel, tmrAddedBy, topAdded } from "@/lib/tmr-added";
 
 const NO_DISTRICT = "(No district)";
-const NO_SEM = "(No SE manager)";
+const NO_SEM = "(No SEM)";
 
 function TopList({ title, rows, hrefFor, empty }: {
   title: string;
@@ -56,9 +56,9 @@ export function TopAseAdded() {
       {error ? <p role="alert" className="text-sm text-destructive">{error}</p> : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <TopList title="Top 3 districts" rows={districts} empty="No ASE TMRs added yet this quarter."
-            hrefFor={(key) => `/uncovered?${new URLSearchParams({ district: key })}`} />
+            hrefFor={(key) => `/ase-added/accounts?${new URLSearchParams({ district: key })}`} />
           <TopList title="Top 3 SEMs" rows={sems} empty="No ASE TMRs added yet this quarter."
-            hrefFor={(key) => `/uncovered?${new URLSearchParams({ sem: key })}`} />
+            hrefFor={(key) => `/ase-added/accounts?${new URLSearchParams({ sem: key })}`} />
         </div>
       )}
     </section>

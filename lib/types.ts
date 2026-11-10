@@ -68,7 +68,7 @@ export interface Deal {
   rvp: string | null;
   /** AE / opportunity owner. */
   owner: string | null;
-  /** SE Manager (deduped to one per account); null => "(No SE manager)". */
+  /** SE Manager (deduped to one per account); null => "(No SEM)". */
   seManager: string | null;
   /** Lead SE on the account (from D_SALESFORCE_ACCOUNT_CUSTOMERS). */
   leadSe: string | null;

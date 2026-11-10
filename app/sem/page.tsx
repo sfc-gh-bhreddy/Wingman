@@ -7,7 +7,7 @@ import { useTmrAddedColumn } from "@/components/use-tmr-added-column";
 import { bySeManager } from "@/lib/aggregate";
 import type { Deal } from "@/lib/types";
 
-const semOf = (d: Deal) => d.seManager ?? "(No SE manager)";
+const semOf = (d: Deal) => d.seManager ?? "(No SEM)";
 
 export default function SemRollupPage() {
   const { quarterDeals } = useCoverage();
@@ -16,11 +16,11 @@ export default function SemRollupPage() {
   return (
     <PageShell
       title="SEM Rollup"
-      description="ASE coverage and ASE TMRs added by SE manager. Click an SEM to see their accounts. Region and quarter filters apply."
+      description="ASE coverage and ASE TMRs added by SEM. Click an SEM to see their accounts. Region and quarter filters apply."
       showQuarterFilter
     >
       <RollupTable
-        dimensionLabel="SE Manager"
+        dimensionLabel="SEM"
         rows={bySeManager(quarterDeals)}
         showWarning={false}
         addedLabel={added.label}

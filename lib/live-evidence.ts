@@ -55,7 +55,7 @@ export function attachLiveEvidence(deals: Deal[], evidence: LiveEvidenceRow[]): 
         date: row.EVIDENCE_DATE,
         source: row.SOURCE,
         district: row.DISTRICT ?? "(No district)",
-        sem: row.SE_MANAGER ?? "(No SE manager)",
+        sem: row.SE_MANAGER ?? "(No SEM)",
         checkedAt: row.CHECKED_AT,
       } : undefined,
     };

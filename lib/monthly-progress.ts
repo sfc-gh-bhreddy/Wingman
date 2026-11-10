@@ -3,7 +3,7 @@ import type { Deal } from "./types";
 export const MONTHLY_TARGET = 12;
 export const REPORTING_TIMEZONE = "America/New_York";
 export const NO_DISTRICT = "(No district)";
-export const NO_SEM = "(No SE manager)";
+export const NO_SEM = "(No SEM)";
 
 export interface MonthlyPair {
   key: string;

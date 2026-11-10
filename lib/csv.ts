@@ -13,9 +13,9 @@ const COLUMNS: Array<{ header: string; get: (d: Deal) => unknown }> = [
   { header: "ASE By Close", get: (d) => (d.hasAseByClose ? "Yes" : "No") },
   { header: "District", get: (d) => d.district },
   { header: "RVP", get: (d) => d.rvp },
-  { header: "Owner (AE)", get: (d) => d.owner },
+  { header: "AE", get: (d) => d.owner },
   { header: "SE", get: (d) => d.leadSe },
-  { header: "SE Manager", get: (d) => d.seManager ?? "(No SE manager)" },
+  { header: "SEM", get: (d) => d.seManager ?? "(No SEM)" },
   { header: "Opportunity ID", get: (d) => d.opportunityId },
 ];
 
