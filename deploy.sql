@@ -55,7 +55,7 @@ CREATE SERVICE IF NOT EXISTS ACCOUNT_ENGINEERING.WINGMAN.WINGMAN_SERVICE
   spec:
     containers:
       - name: app
-        image: /account_engineering/wingman/wingman_images/wingman:consolidated-20261109b
+        image: /account_engineering/wingman/wingman_images/wingman:consolidated-20261110
         env:
           SNOWFLAKE_WAREHOUSE: SNOWADHOC
         resources:
